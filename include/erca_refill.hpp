@@ -15,7 +15,6 @@ namespace search{
 
 #define DEBUG_REFILL 1
 
-
 //////////////////////////////////////////////////////////////////
 
 /**
@@ -39,7 +38,6 @@ public:
  * @brief
  */
 std::ostream& operator<<(std::ostream& os, FrontierNaive& f) ;
-
 
 
 /**

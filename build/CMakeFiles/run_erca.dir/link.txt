@@ -1,0 +1,1 @@
+/usr/bin/c++  -std=c++0x  -O3 -DNDEBUG  -rdynamic CMakeFiles/run_erca.dir/test/run_erca.cpp.o  -o run_erca  -Wl,-rpath,/home/anushtup/Documents/Coding/Thesis/ERCA_star_refuel/dev_erca_refill/build libemoa.so 

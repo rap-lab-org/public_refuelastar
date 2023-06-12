@@ -1,5 +1,10 @@
 
 #include "erca_refill.hpp"
+#include <chrono>
+
+//DEFINED QMAX:
+long qmax = 10;
+
 
 namespace rzq{
 namespace search{
@@ -19,16 +24,29 @@ bool FrontierNaive::Check(basic::CostVector g) {
   for (auto l_prime: labels) {
     // ********** TODO, implement this method ***********
     // check if the input g is worse than any existing l_prime.g
+    if (g[0] >= l_prime.second.g[0] && g[1] <= l_prime.second.g[1]) 
+    {
+      return true;
+    }
   }
   return false;
 };
 
 void FrontierNaive::Update(Label l) {
 
-  for (auto l_prime: labels) {
+  for (auto l_prime: labels) 
+    {
     // ********** TODO, implement this method ***********
     // check any existing l_prime.g is worse than the input l.g
-  }
+    if (l.g[0] >= l_prime.second.g[0] && l.g[1] <= l_prime.second.g[1])
+      {
+      label_ids.erase(l_prime.first);
+      }
+    else
+      {
+      return; 
+      }
+    }
 
   // add l to the frontier.
   this->label_ids.insert(l.id);
@@ -74,7 +92,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   _label[lo.id] = lo;
   _res.n_generated++;
   _open.insert( std::make_pair(lo.f, lo.id) );
-
+  
   // ### main search loop ###
   while ( !_open.empty() ) {
 
@@ -89,6 +107,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
     // ## select label l ##
     Label l = _label[ _open.begin()->second ];
     _open.erase(_open.begin());
+    std::cout<<"Label now is: "<< l.id<<" "<<l.g[0] <<std::endl;
 
     // TODO read this notes:
     // l.g[0] = the cost value of this label. the g-value
@@ -99,8 +118,6 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
     if (DEBUG_REFILL > 0) {
       std::cout << "[DEBUG] ### Pop l = " << l << std::endl;
     }
-
-   
 
     if (_checkForPrune(l)) {
       continue;
@@ -116,7 +133,40 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
 
     for (auto u : nghs) {
        // ********** TODO, implement the expansion of label l ***********
+      basic::CostVector c = _roadmap->GetCost(l.v, u);
+      long edge_cost = c[0];
+      
+      long g_prime, q_prime;
 
+      if(c[1] > c[0])
+      {
+        g_prime = l.g[0] + (qmax - l.g[1])*c[0];
+        q_prime = qmax + _roadmap->GetCost(u, l.v)[0];
+      }
+
+      else 
+      {
+        if(_roadmap->GetCost(u, l.v)[0] > l.g[1])
+        {
+          g_prime = l.g[0] + (_roadmap->GetCost(u, l.v)[0] - l.g[1]) * c[0];
+          q_prime = 0;
+        }
+        else
+        {
+          g_prime = l.g[0];
+          q_prime = l.g[1] - _roadmap->GetCost(u, l.v)[0];
+        }
+      }
+      Label l_prime(_GenLabelId(), u, basic::CostVector{g_prime, q_prime}, _Heuristic(u));
+
+      if (_checkForPrune(l_prime)) {
+        continue;
+      }
+
+      _label[l_prime.id] = l_prime;
+      _open.insert(std::make_pair(l_prime.f, l_prime.id));
+      std::cout<<"Label now is: "<< l_prime <<std::endl;
+      _res.n_generated++;
     } // end of the for-loop.
   } // end of the while-loop
 
@@ -170,8 +220,14 @@ void AstarRefill::_computeReachableSets() {
 
   auto all_vertices = _roadmap->GetNodes();
 
+  // Initialize reachable sets
   for (auto v : all_vertices)
-    
+  {  
+    _reachableSets[v] = {};
+  }
+
+  for (auto v : all_vertices)
+  
     // ********** TODO, implement this method ***********
 
     // Compute _reachableSets, which is an unordered map.
@@ -183,11 +239,53 @@ void AstarRefill::_computeReachableSets() {
     
     // to get the cost of an edge (v,u) c = _roadmap->GetCost(v,u), 
     //      which returns a CostVector of length one, and c[0] is the cost value of the edge.
+  {
+    std::unordered_map<int, long> d_star;
+    std::unordered_set<int> OPENv;
+    
+    // Initialize distances
+    for (auto u : all_vertices)
+      {
+        d_star[u] = std::numeric_limits<long>::infinity();
+      }
+    d_star[v] = 0.0;
 
-  return ;
+    OPENv.insert(v);
+
+    while (!OPENv.empty()) {
+      int u = *OPENv.begin();
+      OPENv.erase(OPENv.begin());
+
+      if (d_star[u] > qmax) {
+        continue;
+      } 
+      else {
+        _reachableSets[v].insert(u);
+      }
+      // Get successors of u
+      std::unordered_set<long> succs = _roadmap->GetSuccs(u);
+
+      for (auto u_prime : succs) {
+        if (_reachableSets[v].count(u_prime) > 0) {
+          continue;
+        }
+
+        // Get cost of edge (u, u_prime)
+        std::vector<long> c = _roadmap->GetCost(u, u_prime);
+        double edge_cost = c[0];
+
+        if (d_star[u_prime] > d_star[u] + edge_cost) {
+          d_star[u_prime] = d_star[u] + edge_cost;
+          OPENv.insert(u_prime);
+        }
+      }
+      }
+    }
+
+  _reachableSets = std::move(_reachableSets);
+    
+  return;
 };
-
-
 
 } // end namespace search
 } // end namespace rzq

@@ -137,7 +137,7 @@ public:
   EMOA() ;
   virtual ~EMOA() ;
   // virtual void SetMode(const std::string in) ;
-
+  
   // set graph as pointer, note to leverage polymorphism here.
   virtual void SetGraphPtr(basic::Graph* g) ;
 

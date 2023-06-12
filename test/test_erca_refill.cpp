@@ -7,7 +7,7 @@
 #include "api.hpp"
 #include "erca_refill.hpp"
 
-int TestRoadmapToyExample();
+int TestRoadmapToyExample(); 
 
 int main(){
   TestRoadmapToyExample();
@@ -66,6 +66,7 @@ int TestRoadmapToyExample() {
   std::cout << "cdims: " << g.GetCostDim() << std::endl;
   std::cout << "g.GetCost(1, 2): " << g.GetCost(1, 2) << std::endl;
   std::cout << "g.GetCost(1, 3): " << g.GetCost(1, 3) << std::endl;
+  std::cout << "g.GetCost(4, 5): " << g.GetCost(4, 5) << std::endl;
 
   long vo = 1; // starting vertex in the graph.
   long vd = 6; // destination vertex id in the graph.

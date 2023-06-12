@@ -1,4 +1,3 @@
-
 /*******************************************
  * Author: Zhongqiang Richard Ren.
  * All Rights Reserved.
@@ -86,7 +85,7 @@ int main( int argc, char *argv[] ) {
   rzq::search::RunERCA(&g, vo, vd, time_limit, resource_limits, &res);
 
   rzq::basic::SaveResultToFile(result_fname, load_graph_time, &res);
-
+  
   return 1;
 };
 

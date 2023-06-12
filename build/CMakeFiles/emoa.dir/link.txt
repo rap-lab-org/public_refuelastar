@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -std=c++0x  -O3 -DNDEBUG  -shared -Wl,-soname,libemoa.so -o libemoa.so CMakeFiles/emoa.dir/source/avltree.cpp.o CMakeFiles/emoa.dir/source/dijkstra.cpp.o CMakeFiles/emoa.dir/source/emoa.cpp.o CMakeFiles/emoa.dir/source/erca.cpp.o CMakeFiles/emoa.dir/source/erca_refill.cpp.o CMakeFiles/emoa.dir/source/graph.cpp.o CMakeFiles/emoa.dir/source/graph_io.cpp.o 
