@@ -59,6 +59,8 @@ public:
 
   virtual void SetRoadmap(basic::Roadmap*) ;
 
+  virtual void SetQmax(long qm);
+
 protected:
   virtual basic::CostVector _Heuristic(long v) override ;
 
@@ -68,6 +70,8 @@ protected:
 
   virtual void _computeReachableSets() ;
 
+  virtual void _PostProcRes();
+
   std::unordered_map<long,long> _refill_costs ; // map a vertex to the refill cost at that vertex.
   int _vec_len = 2; // first component is the accumulated cost, the second component is the amount of remaining fuel.
 
@@ -76,6 +80,8 @@ protected:
   std::unordered_map< long, std::unordered_set<long> > _reachableSets;
 
   basic::Roadmap* _roadmap; // graph 
+
+  long _q_max = -1;
 };
 
 } // end namespace search

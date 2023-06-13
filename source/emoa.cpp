@@ -356,7 +356,7 @@ basic::CostVector EMOA::_Heuristic(long v) {
       throw std::runtime_error( "[ERROR], unavailable heuristic !?" );
     }
   }
-  // std::cout << " h(" << v << ") = " << out << std::endl;
+  //std::cout << " h(" << v << ") = " << out << std::endl;
   return out;
 };
 
@@ -448,7 +448,9 @@ EMOAKd::EMOAKd() {};
 EMOAKd::~EMOAKd() {};
 
 void EMOAKd::_PostProcRes() {
+  std::cout << "_PostProcRes enter _vd = " << _vd << std::endl;
   if (_alpha.find(_vd) != _alpha.end()) {
+    std::cout << "_PostProcRes" << _alpha[_vd].label_ids.size() << std::endl;
     for (auto lid : _alpha[_vd].label_ids) {
       _res.paths[lid] = _BuildPath(lid);
       _res.costs[lid] = _label[lid].g;
