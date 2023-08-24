@@ -21,7 +21,7 @@ SOFTWARE.
 * `source/` - Contains the path planning source code
 * `test/` - Contains example code for path planning algorithms
 * `include/` - Contains header files
-* `data/` - Contains sample graph files and sample result files
+* `City data/` - Contains sample graph files and sample result files
 
 ## Instructions:
 
