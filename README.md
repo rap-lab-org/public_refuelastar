@@ -64,7 +64,5 @@ Result file contains multiple lines of metadata:
 * N = the number of solutions found, which is always one.
 
 The computed solution is then listed in three lines:
-* The first line contains `Label: {label_id}`, which can be ignored in practice.
-* The second line contains the a vector of format (objective_value, resource_1_value, resource_2_value, ..., resource_(M-1)_value) of the solution path.
-* The third line contains the solution path (a list of vertices).
+
 
