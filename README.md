@@ -1,7 +1,6 @@
-# Enhanced Resource Constrained A* (ERCA*)
-
-This work addresses a Resource Constrained Shortest Path Problem (RC-SPP) on a graph where the objective is to find a min-cost start-goal path while ensuring that the resource consumed along the path do not exceed the given limits.
-This repo provides a C++ implementation of Enhanced Resource Constrained A\* (ERCA\*) Algorithm, which is guaranteed to find an optimal solution path.
+# Refuel A* (RA*)
+This work addresses the Path Finding with Refuelling (PF-RF) problem, where the main objective is to find a minimum cost of refuelling path from the start to the goal while ensuring that the robot does not cross a specified limit on the number of stops made.
+This repo provides a C++ implementation of Refuel A\* (RA\*) Algorithm, which is guaranteed to find an optimal solution path.
 
 The code is distributed for academic and non-commercial use.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -54,14 +53,7 @@ SOFTWARE.
 
 
 ### Graph file specification
-
-Graphs are directed graphs labeled from 1~*n*, where *n* is the number of vertices.
-
-If parallel edges are specified in the graph file, only the lexico-smallest edge is used.
-
-Graph files must follow the same format described by [DIMACS](http://www.diag.uniroma1.it//~challenge9/format.shtml#graph).
-
-Graph files used in the same run must correspond to each other line-by-line.
+The graph files are all `.csv` files which were constructed usign the OpenStreetMap dataset queried using `osmnx` library in python. The files have the following columns: `Gas_node_from` (Station ID of the gas node we are travelling from as in the OpenStreetMap), `Gas_node_to` (station ID of the gas node we are travelling to as in OpenStreetMap), `distance` (in meters), `cost` (the cost of refuelling 1 unit of gas at that station), `index_from` and `index_to` (for ease of indexing to store the graph data in our graph datastructure).
 
 ### Result file specifiction
 
