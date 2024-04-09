@@ -149,8 +149,8 @@ int main() {
   long K_max = 10;
   long n = 61; // change based on input, number of vertices
   long U = 6000;
-  long s = 1;
-  long t = 5;
+  long s = 2;
+  long t = 30;
 
   std::vector<StationData> Station = station(s, t, U);
   solve(Station, K_max, n, U, s, t);
@@ -162,7 +162,7 @@ std::vector<StationData> station(long vo, long vd, long qmax) {
   std::vector<GasData> gasData;
   std::vector<StationData> Station;
 
-  std::ifstream file("./dev_erca_refill/City Data/Phil_gas.csv"); // FILE PATH
+  std::ifstream file("./City Data/Phil_gas.csv"); // FILE PATH
 
   if (!file.is_open()) {
     std::cout << "Error opening the file !!" << std::endl;

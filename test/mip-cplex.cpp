@@ -194,7 +194,7 @@ std::vector<StationData> station(long vo, long vd, long qmax) {
   std::vector<GasData> gasData;
   std::vector<StationData> Station;
 
-  std::ifstream file("./dev_erca_refill/City Data/Phil_gas.csv"); // FILE PATH
+  std::ifstream file("./City Data/Phil_gas.csv"); // FILE PATH
 
   if (!file.is_open()) {
     std::cout << "Error opening the file !!" << std::endl;
