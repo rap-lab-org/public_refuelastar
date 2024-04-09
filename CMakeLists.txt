@@ -5,7 +5,7 @@ project(emoa)
 
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 set(CPLEX_DIR /opt/ibm/ILOG/CPLEX_Studio_Community2211)
-set(GUROBI_DIR gurobi1003/linux64)
+set(GUROBI_DIR gurobi_dir)
 # set(orDIR /home/anushtup/Documents/or-tools_amd64_ubuntu-20.04_cpp_v9.8.3296/or-tools_x86_64_Ubuntu-20.04_cpp_v9.8.3296)
 # set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};<path/to/ortools>/lib/cmake/ortools")
 

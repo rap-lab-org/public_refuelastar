@@ -14,6 +14,9 @@ SOFTWARE.
 ## Requirements
 
 * We use CMake (3.16.3) and Make (4.2.1) to compile the code. Lower or higher version may also work.
+* Optional:
+    * CPLEX Academic Version
+    * Gurobi Academic Version
 
 ## Project Structure
 
@@ -28,6 +31,26 @@ SOFTWARE.
 ### Installation
 
 * Clone this repo
+* Install CPLEX C++ library (optional)
+* Install Gurobi C++ library(optional)
+    * create a folder to store Gurobi header and library: `mkdir gurobi_dir`
+    * [download version 10](https://www.gurobi.com/downloads/gurobi-software/)
+    * extract all resources from the downloaded package and store in `gurobi_dir`
+    * the structure of `gurobi_dir` must be:
+    ```
+        gurobi_dir
+        ├── bin/
+        ├── docs/
+        ├── EULA.pdf
+        ├── examples/
+        ├── include/
+        ├── lib/
+        ├── matlab/
+        ├── R/
+        ├── ReleaseNotes.html
+        ├── setup.py
+        └── src/
+    ```
 * Compile this repo
   * `mkdir build`
   * `cd build`

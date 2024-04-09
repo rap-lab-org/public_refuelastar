@@ -31,5 +31,5 @@
 *.out
 *.app
 build/*
-gurobi**/*
+gurobi_dir/*
 *.log
