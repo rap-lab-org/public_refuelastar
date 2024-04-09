@@ -61,6 +61,7 @@ public:
   virtual void SetRoadmap(basic::Roadmap*) ;
 
   virtual void SetQmax(long qm);
+  virtual void SetKmax(long km);
 
   // virtual void SetKmax(long km);
     

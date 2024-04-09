@@ -292,9 +292,9 @@ void AstarRefill::SetQmax(long qm) {
   _q_max = qm;
 };
 
-// void AstarRefill::SetKmax(long km) {
-//   _k_max = km;
-// };
+void AstarRefill::SetKmax(long km) {
+  _k_max = km;
+};
 
 basic::CostVector AstarRefill::_Heuristic(long v) {
   basic::CostVector out;
