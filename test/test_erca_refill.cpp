@@ -306,7 +306,7 @@ int TestRoadmapToyExample(long vo, long vd) {
   return 1;
 };
 
-int main() {
+int main(int argc, char** argv) {
   // AGENT 1;
   // long vo = 1;
   // long vd = 4;
@@ -317,11 +317,12 @@ int main() {
   // long vo1 = 2;
   // long vd1 = 3;
   // TestRoadmapToyExample(vo1, vd1);
-  std::string file = "./City Data/Phil_gas.csv";
+  // ./<bin> <file> <s> <t>
+  std::string file = std::string(argv[1]);
+  long s = std::stoi(argv[2]);
+  long t = std::stoi(argv[3]);
   long kMax = 10;
   long qMax = 6000;
-  long s = 2;
-  long t = 30;
   expr(file, s, t, qMax, kMax);
   return 0;
 };

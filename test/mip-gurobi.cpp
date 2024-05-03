@@ -37,7 +37,76 @@ struct Edge {
   int index_to;
 };
 
-std::vector<StationData> station(long vo, long vd, long qmax);
+std::vector<StationData> station(const std::string& fname, long vo, long vd, long qmax) {
+
+  std::vector<GasData> gasData;
+  std::vector<StationData> Station;
+
+  std::ifstream file(fname); // FILE PATH
+
+  if (!file.is_open()) {
+    std::cout << "Error opening the file !!" << std::endl;
+  }
+  //
+  std::string line;
+  std::getline(file, line); // skip the header line
+  //
+  while (std::getline(file, line)) {
+    std::stringstream lineStream(line);
+    std::string cell;
+
+    GasData data;
+
+    std::getline(lineStream, cell, ',');
+    data.nodeFrom = std::stod(cell);
+
+    std::getline(lineStream, cell, ',');
+    data.nodeTo = std::stod(cell);
+
+    std::getline(lineStream, cell, ',');
+    data.distance = std::stod(cell);
+
+    std::getline(lineStream, cell, ',');
+    data.cost = std::stod(cell);
+
+    std::getline(lineStream, cell, ',');
+    data.id_from = std::stod(cell);
+
+    std::getline(lineStream, cell, ',');
+    data.id_to = std::stod(cell);
+
+    gasData.push_back(data);
+  }
+  file.close();
+
+  // TODO
+  // OPENSTREETMAP Dataset: //--> for the openstreetmap dataset since most data
+  // is in float format, and we need to bring it to integral ones for (auto i:
+  // gasData)
+  // {
+  //   long nodeFrom = std::round(i.nodeFrom);
+  //   long nodeTo = std::round(i.nodeTo);
+  //   long distance = std::round(1000*i.distance);
+  //   long cost = std::round(1000*i.cost);
+  //   long id_from = std::round(i.id_from);
+  //   long id_to = std::round(i.id_to);
+  //   Station.push_back({nodeFrom,nodeTo ,distance ,cost, id_from, id_to});
+  // }
+
+  /*
+    CONVERTING ALL THE LONG DOUBLES TO LONG TYPE:
+  */
+  for (auto i : gasData) {
+    long nodeFrom = i.nodeFrom;
+    long nodeTo = i.nodeTo;
+    long distance = i.distance;
+    long cost = i.cost;
+    long id_from = i.id_from;
+    long id_to = i.id_to;
+    Station.push_back({nodeFrom, nodeTo, distance, cost, id_from, id_to});
+  }
+  return Station;
+};
 
 void solve(const vector<StationData> &station, long Kmax, long n, long U,
            long s, long t) {
@@ -123,7 +192,7 @@ void solve(const vector<StationData> &station, long Kmax, long n, long U,
       // Stops Constraint
       GRBLinExpr stops = 0;
       for (int j=0; j<n; j++) if (j != i) {
-        stops += y[i];
+        stops += y[j];
       }
       model.addConstr(stops <= Kmax);
     }
@@ -144,86 +213,18 @@ void solve(const vector<StationData> &station, long Kmax, long n, long U,
   }
 }
 
-int main() {
+int main(int argc, char** argv) {
 
+  std::string file = std::string(argv[1]);
+  long s = std::stoi(argv[2]);
+  long t = std::stoi(argv[3]);
   long K_max = 10;
   long n = 61; // change based on input, number of vertices
   long U = 6000;
-  long s = 2;
-  long t = 30;
+  // long s = 2;
+  // long t = 30;
 
-  std::vector<StationData> Station = station(s, t, U);
+  std::vector<StationData> Station = station(file, s, t, U);
   solve(Station, K_max, n, U, s, t);
   return 0;
 }
-
-std::vector<StationData> station(long vo, long vd, long qmax) {
-
-  std::vector<GasData> gasData;
-  std::vector<StationData> Station;
-
-  std::ifstream file("./City Data/Phil_gas.csv"); // FILE PATH
-
-  if (!file.is_open()) {
-    std::cout << "Error opening the file !!" << std::endl;
-  }
-  //
-  std::string line;
-  std::getline(file, line); // skip the header line
-  //
-  while (std::getline(file, line)) {
-    std::stringstream lineStream(line);
-    std::string cell;
-
-    GasData data;
-
-    std::getline(lineStream, cell, ',');
-    data.nodeFrom = std::stod(cell);
-
-    std::getline(lineStream, cell, ',');
-    data.nodeTo = std::stod(cell);
-
-    std::getline(lineStream, cell, ',');
-    data.distance = std::stod(cell);
-
-    std::getline(lineStream, cell, ',');
-    data.cost = std::stod(cell);
-
-    std::getline(lineStream, cell, ',');
-    data.id_from = std::stod(cell);
-
-    std::getline(lineStream, cell, ',');
-    data.id_to = std::stod(cell);
-
-    gasData.push_back(data);
-  }
-  file.close();
-
-  // TODO
-  // OPENSTREETMAP Dataset: //--> for the openstreetmap dataset since most data
-  // is in float format, and we need to bring it to integral ones for (auto i:
-  // gasData)
-  // {
-  //   long nodeFrom = std::round(i.nodeFrom);
-  //   long nodeTo = std::round(i.nodeTo);
-  //   long distance = std::round(1000*i.distance);
-  //   long cost = std::round(1000*i.cost);
-  //   long id_from = std::round(i.id_from);
-  //   long id_to = std::round(i.id_to);
-  //   Station.push_back({nodeFrom,nodeTo ,distance ,cost, id_from, id_to});
-  // }
-
-  /*
-    CONVERTING ALL THE LONG DOUBLES TO LONG TYPE:
-  */
-  for (auto i : gasData) {
-    long nodeFrom = i.nodeFrom;
-    long nodeTo = i.nodeTo;
-    long distance = i.distance;
-    long cost = i.cost;
-    long id_from = i.id_from;
-    long id_to = i.id_to;
-    Station.push_back({nodeFrom, nodeTo, distance, cost, id_from, id_to});
-  }
-  return Station;
-};
