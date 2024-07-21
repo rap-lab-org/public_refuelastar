@@ -4,7 +4,6 @@ project(emoa)
 # find_package(Boost REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
-set(CPLEX_DIR /opt/ibm/ILOG/CPLEX_Studio_Community2211)
 set(GUROBI_DIR gurobi_dir)
 # set(orDIR /home/anushtup/Documents/or-tools_amd64_ubuntu-20.04_cpp_v9.8.3296/or-tools_x86_64_Ubuntu-20.04_cpp_v9.8.3296)
 # set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};<path/to/ortools>/lib/cmake/ortools")
@@ -16,15 +15,11 @@ file(GLOB_RECURSE ALL_SRCS "source/*.cpp")
 include_directories(DIRECTORY 
   include/${PROJECT_NAME}
   include
-  ${CPLEX_DIR}/cplex/include
-  ${CPLEX_DIR}/concert/include
   ${GUROBI_DIR}/include
   # ${orDIR}/include
 )
 
 link_directories(
-  ${CPLEX_DIR}/cplex/lib/x86-64_linux/static_pic
-  ${CPLEX_DIR}/concert/lib/x86-64_linux/static_pic
   ${GUROBI_DIR}/lib
   # ${orDIR}/lib
   # ${orDIR}/lib/cmake/ortools
@@ -46,9 +41,6 @@ foreach(test_cpp_file ${test_cpp_files})
   TARGET_LINK_LIBRARIES(${test_cpp_name} 
     ${PROJECT_NAME} 
     # pthread ## this is for linux systems
-    ilocplex
-    cplex
-    concert
     m
     pthread
     dl
