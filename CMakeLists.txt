@@ -16,14 +16,9 @@ include_directories(DIRECTORY
   include/${PROJECT_NAME}
   include
   ${GUROBI_DIR}/include
-  # ${orDIR}/include
 )
 
-link_directories(
-  ${GUROBI_DIR}/lib
-  # ${orDIR}/lib
-  # ${orDIR}/lib/cmake/ortools
-)
+link_directories( ${GUROBI_DIR}/lib)
 
 # find_package(ortools CONFIG REQUIRED)
 
@@ -40,12 +35,22 @@ foreach(test_cpp_file ${test_cpp_files})
   ADD_EXECUTABLE(${test_cpp_name} ${test_cpp_dir}/${test_cpp_name}.cpp)
   TARGET_LINK_LIBRARIES(${test_cpp_name} 
     ${PROJECT_NAME} 
-    # pthread ## this is for linux systems
-    m
-    pthread
-    dl
     gurobi100
     gurobi_g++5.2
-    # ortools
   )
 endforeach(test_cpp_file ${test_cpp_files})
+
+
+
+set(exec_cpp_dir "program/")
+set(exec_cpp_files "")
+file(GLOB_RECURSE exec_cpp_files "${exec_cpp_dir}/*.cpp")
+foreach(exec_cpp_file ${exec_cpp_files})
+  get_filename_component(exec_cpp_name ${exec_cpp_file} NAME_WE)
+  ADD_EXECUTABLE(${exec_cpp_name} ${exec_cpp_dir}/${exec_cpp_name}.cpp)
+  TARGET_LINK_LIBRARIES(${exec_cpp_name} 
+    ${PROJECT_NAME} 
+    gurobi100
+    gurobi_g++5.2
+  )
+endforeach(exec_cpp_file ${exec_cpp_files})
