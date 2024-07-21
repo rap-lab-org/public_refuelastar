@@ -70,8 +70,10 @@ AstarRefill::AstarRefill(){};
 AstarRefill::~AstarRefill(){};
 
 int AstarRefill::Search(long vo, long vd, double time_limit) {
-
   auto s = std::chrono::steady_clock::now();
+
+  _vo = vo;
+  _vd = vd;
 
   // ### init heu and compute reachable sets ###
   auto t1 = std::chrono::steady_clock::now();
@@ -82,8 +84,6 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
 
   // ### init ###
   auto tstart = std::chrono::steady_clock::now();
-  _vo = vo;
-  _vd = vd;
   basic::CostVector init_vec(_vec_len, 0);
   Label lo(_GenLabelId(), _vo, init_vec, _Heuristic(_vo));
   _label[lo.id] = lo;
@@ -282,6 +282,9 @@ void AstarRefill::_computeReachableSets() {
       break;
     }
   }
+
+  // fix issue #5: set target cost to be inf
+  _stationCost[_vd] = std::numeric_limits<long>::max();
 
   // Initialize reachable sets
   for (auto v : _roadmap->GetNodes()) {
