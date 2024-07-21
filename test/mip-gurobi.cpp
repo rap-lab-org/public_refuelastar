@@ -1,5 +1,3 @@
-#include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <gurobi_c++.h>
@@ -37,7 +35,7 @@ struct Edge {
   int index_to;
 };
 
-std::vector<StationData> station(const std::string& fname, long vo, long vd, long qmax) {
+std::vector<StationData> station(const std::string& fname, long vo, long vd) {
 
   std::vector<GasData> gasData;
   std::vector<StationData> Station;
@@ -108,9 +106,10 @@ std::vector<StationData> station(const std::string& fname, long vo, long vd, lon
   return Station;
 };
 
-void solve(const vector<StationData> &station, long Kmax, long n, long U,
+void solve(const vector<StationData> &station, long Kmax, long U,
            long s, long t) {
 
+  int n = station.size();
   std::vector<long> c(n, 0);
   std::vector<std::vector<long>> d(n, std::vector<long>(n, 0));
   std::vector<std::vector<int>> E(n, std::vector<int>(n, 0));
@@ -140,8 +139,7 @@ void solve(const vector<StationData> &station, long Kmax, long n, long U,
     // decision varaibles
     vector<vector<GRBVar>> x(n, vector<GRBVar>(n));
     vector<GRBVar> r(n); // amount of gas left in the tank
-    vector<GRBVar> g(
-        n); // the amount of gas purchased to refuel the vehicle at v_i
+    vector<GRBVar> g(n); // the amount of gas purchased to refuel the vehicle at v_i
     vector<GRBVar> y(n); // stop mad or not
 
     // init varaibles
@@ -218,13 +216,13 @@ int main(int argc, char** argv) {
   std::string file = std::string(argv[1]);
   long s = std::stoi(argv[2]);
   long t = std::stoi(argv[3]);
-  long K_max = 10;
-  long n = 61; // change based on input, number of vertices
-  long U = 6000;
+  // long K_max = 10;
+  // long U = 6000;
   // long s = 2;
   // long t = 30;
+  long kMax = 5, qMax = 6;
 
-  std::vector<StationData> Station = station(file, s, t, U);
-  solve(Station, K_max, n, U, s, t);
+  std::vector<StationData> Station = station(file, s, t);
+  solve(Station, kMax, qMax, s, t);
   return 0;
 }
