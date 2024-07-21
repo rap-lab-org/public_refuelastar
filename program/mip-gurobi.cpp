@@ -8,8 +8,8 @@
 
 using namespace std;
 
-void solve(const vector<StationData> &station, long Kmax, long U,
-           long s, long t) {
+void solve(const vector<StationData> &station, 
+           const long s, const long t, const long K, const long Q) {
 
   int n = station.size();
   std::vector<long> c(n, 0);
@@ -51,8 +51,8 @@ void solve(const vector<StationData> &station, long Kmax, long U,
       }
 
     for (int i = 0; i < n; i++) {
-      r[i] = model.addVar(0, U, 0, GRB_INTEGER);
-      g[i] = model.addVar(0, U, 0, GRB_INTEGER);
+      r[i] = model.addVar(0, Q, 0, GRB_INTEGER);
+      g[i] = model.addVar(0, Q, 0, GRB_INTEGER);
       y[i] = model.addVar(0, 1, 0, GRB_BINARY);
     }
 
@@ -87,14 +87,14 @@ void solve(const vector<StationData> &station, long Kmax, long U,
         }
       }
       // Tank Capacity
-      model.addConstr(r[i] + g[i] <= U);
+      model.addConstr(r[i] + g[i] <= Q);
 
       // Stops Constraint
       GRBLinExpr stops = 0;
       for (int j=0; j<n; j++) if (j != i) {
         stops += y[j];
       }
-      model.addConstr(stops <= Kmax);
+      model.addConstr(stops <= K);
     }
 
     // Objective: min sum(ci * gi)
@@ -118,16 +118,16 @@ int main(int argc, char** argv) {
   std::string file = std::string(argv[1]);
   long s = std::stoi(argv[2]);
   long t = std::stoi(argv[3]);
-  long kMax = std::stoi(argv[4]);
-  long qMax = std::stoi(argv[5]);
+  long K = std::stoi(argv[4]);
+  long Q = std::stoi(argv[5]);
   // long K_max = 10;
-  // long U = 6000;
+  // long Q = 6000;
   // long s = 2;
   // long t = 30;
   // long kMax = 5, qMax = 6;
 
   std::vector<StationData> stations;
   load(file, stations);
-  solve(stations, kMax, qMax, s, t);
+  solve(stations, s, t, K, Q);
   return 0;
 }

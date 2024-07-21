@@ -84,8 +84,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   auto tstart = std::chrono::steady_clock::now();
   _vo = vo;
   _vd = vd;
-  basic::CostVector init_vec;
-  init_vec.resize(_vec_len, 0);
+  basic::CostVector init_vec(_vec_len, 0);
   Label lo(_GenLabelId(), _vo, init_vec, _Heuristic(_vo));
   _label[lo.id] = lo;
   _res.n_generated++;
