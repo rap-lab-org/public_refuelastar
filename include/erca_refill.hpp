@@ -72,7 +72,8 @@ protected:
 
   virtual void _filterAndAddFront(Label l);
 
-  virtual void _computeReachableSets();
+  void _computeReachableSets();
+  void _computeReachableSetsV(long v); 
 
   virtual void _PostProcRes() override;
 
@@ -91,6 +92,8 @@ protected:
       _alpha; // map a vertex id (v) to alpha(v). override
 
   std::unordered_map<long, std::unordered_set<long>> _reachableSets;
+  std::unordered_map<long, std::unordered_map<long, long>> _reachableDist;
+  std::unordered_map<long, long> _stationCost;
 
   basic::Roadmap *_roadmap; // graph
 

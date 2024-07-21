@@ -303,14 +303,14 @@ std::unordered_set<long> Roadmap::GetPreds(long v) {
 
 */
 CostVector Roadmap::GetCost(long u, long v) {
-  return _adjlist[u][v];
+  return _adjlist.at(u).at(v);
 };
 
 size_t Roadmap::GetCostDim() {
   return _cdim;
 };
 
-std::unordered_set<long> Roadmap::GetNodes() {
+const std::unordered_set<long>& Roadmap::GetNodes() const {
   return _nodes;
 }
 
