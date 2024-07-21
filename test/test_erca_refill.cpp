@@ -29,6 +29,8 @@ struct StationData {
   long id_to;
 };
 
+const long PREC = 100;
+
 void load(std::string fname, std::vector<StationData> &stations) {
   std::vector<GasData> gasData;
 
@@ -87,7 +89,7 @@ void load(std::string fname, std::vector<StationData> &stations) {
     long nodeFrom = i.nodeFrom;
     long nodeTo = i.nodeTo;
     long distance = i.distance;
-    long cost = i.cost;
+    long cost = i.cost * PREC;
     long id_from = i.id_from;
     long id_to = i.id_to;
     stations.push_back({nodeFrom, nodeTo, distance, cost, id_from, id_to});
@@ -173,13 +175,6 @@ void expr(std::string fname, long vo, long vd, long qMax, long kMax) {
 }
 
 int main(int argc, char **argv) {
-  // AGENT 1;
-  // long vo = 1;
-  // long vd = 4;
-  // TestRoadmapToyExample(vo, vd);
-  //
-  // std::cout << "----------------" << std::endl;
-  //
   // long vo1 = 2;
   // long vd1 = 3;
   // TestRoadmapToyExample(vo1, vd1);
@@ -187,8 +182,8 @@ int main(int argc, char **argv) {
   std::string file = std::string(argv[1]);
   long s = std::stoi(argv[2]);
   long t = std::stoi(argv[3]);
-  long kMax = 10;
-  long qMax = 6000;
+  long kMax = std::stoi(argv[4]);
+  long qMax = std::stoi(argv[5]);
   // long kMax = 5, qMax = 6;
   expr(file, s, t, qMax, kMax);
   return 0;
