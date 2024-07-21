@@ -33,7 +33,7 @@ def memory_limit():
     """Limit max memory usage to half."""
     soft, hard = resource.getrlimit(resource.RLIMIT_AS)
     # Convert KiB to bytes, and divide in two to half
-    resource.setrlimit(resource.RLIMIT_AS, (get_memory() * 1024 / 2, hard))
+    resource.setrlimit(resource.RLIMIT_AS, (get_memory() * 1024 // 2, hard))
 
 def get_memory():
     with open('/proc/meminfo', 'r') as mem:
