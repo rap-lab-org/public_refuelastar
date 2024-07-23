@@ -145,7 +145,7 @@ long solve(const std::vector<StationData>& stations, const long s, const long t,
   }
 
   auto tnow = std::chrono::steady_clock::now();
-  RT = std::chrono::duration<double>(tnow - tstart).count();
+  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart).count();
   return BEST;
 }
 

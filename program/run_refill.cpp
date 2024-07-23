@@ -7,6 +7,7 @@
 #include "graph.hpp"
 #include "expr_utils.hpp"
 #include <iomanip>
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -33,9 +34,11 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   planner.SetQmax(Q);
   planner.SetKmax(K);
 
+  auto tstart = std::chrono::steady_clock::now();
   planner.Search(s, t, TIMELIMIT);
+  auto tend = std::chrono::steady_clock::now();
   res = planner.GetResult();
-  RT = res.rt_search;
+  RT = std::chrono::duration_cast<std::chrono::microseconds>(tend - tstart).count();
 
   for (auto iter : res.paths) {
     long k = iter.first; // id of a Pareto-optipmal solution

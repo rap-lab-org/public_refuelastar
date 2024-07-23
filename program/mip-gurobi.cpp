@@ -13,7 +13,6 @@
 namespace gurobi {
 
 using namespace std;
-
 double RT, TIMELIMIT;
 std::string GFILE;
 long SID, TID, BEST, QMAX, KMAX;
@@ -166,7 +165,7 @@ int main(int argc, char** argv) {
   std::vector<StationData> stations;
   load(GFILE, stations);
   solve(stations, SID, TID, KMAX, QMAX);
-
+  RT *= 1e6; // s to us
   cout << " cost = " << BEST << endl;
 
   string mapname = get_name(GFILE);

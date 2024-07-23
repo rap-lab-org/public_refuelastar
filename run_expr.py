@@ -1,3 +1,4 @@
+import sys
 from itertools import product
 import pandas as pd
 
@@ -17,7 +18,7 @@ def run_query(expr, sid, tid, exec):
     subprocess.run(cmd.split())
 
 
-def run_map(expr: str):
+def run_map(expr: str, solvers):
     print(f">>> Running {expr}")
     mapname = expr.removesuffix(".csv").split("/")[-1]
     logdir = "./output"
@@ -29,26 +30,40 @@ def run_map(expr: str):
     for i, j in product(list(ids), list(ids)):
         if i >= j:
             continue
-        run_query(expr, i, j, "./build/run_refill")
-        run_query(expr, j, i, "./build/run_refill")
-        run_query(expr, i, j, "./build/dp")
-        run_query(expr, j, i, "./build/dp")
-        run_query(expr, i, j, "./build/mip-gurobi")
-        run_query(expr, j, i, "./build/mip-gurobi")
+        for solver in solvers:
+            run_query(expr, i, j, f"./build/{solver}")
+            run_query(expr, j, i, f"./build/{solver}")
+
+
+def run_city():
+    exprs = [
+        "./city-data/Austin_gas.csv",
+        "./city-data/London_gas.csv",
+        "./city-data/Moscow_no_zero_dist.csv",
+        "./city-data/Phil_gas.csv",
+        "./city-data/Phoenix_gas.csv",
+    ]
+    solvers = ["run_refill", "dp"]
+    for expr in exprs:
+        run_map(expr, solvers)
 
 
 def run_small():
     exprs = [
         "./small-data/graph_data.csv",
-        "./small-data/graph_data2.csv",
-        "./small-data/graph_data3.csv",
-        "./small-data/graph_data4.csv",
-        "./small-data/graph_data5.csv",
+        # "./small-data/graph_data2.csv",
+        # "./small-data/graph_data3.csv",
+        # "./small-data/graph_data4.csv",
+        # "./small-data/graph_data5.csv",
     ]
 
+    solvers = ["dp", "run_refill", "mip-gurobi"]
     for expr in exprs:
-        run_map(expr)
+        run_map(expr, solvers)
 
 
 if __name__ == "__main__":
-    run_small()
+    if len(sys.argv)>1 and sys.argv[1] == "city":
+        run_city()
+    else:
+        run_small()
