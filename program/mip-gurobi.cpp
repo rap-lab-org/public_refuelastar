@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <string>
 #include <vector>
 #include "expr_utils.hpp"
@@ -17,25 +18,40 @@ double RT, TIMELIMIT;
 std::string GFILE;
 long SID, TID, BEST, QMAX, KMAX;
 
-long solve(const vector<StationData> &station, 
-           const long s, const long t, const long K, const long Q) {
+int idmaping(const vector<StationData>& stations, map<long, long>& ids) {
+  set<int> vars;
+  ids.clear();
+  for (auto s: stations) {
+    vars.insert(s.id_from);
+    vars.insert(s.id_to);
+  }
+  int cnt = 0;
+  for (auto v: vars) {
+    ids[v] = cnt++;
+  }
+  return cnt;
+}
 
-  int n = station.size();
-  std::vector<long> c(n, 0);
+long solve(const vector<StationData> &station, 
+           long s, long t, const long K, const long Q) {
+
+  map<long, long> ids;
+  int n = idmaping(station, ids);
+  std::vector<long> c(n, numeric_limits<long>::max());
   std::vector<std::vector<long>> d(n, std::vector<long>(n, 0));
   std::vector<std::vector<int>> E(n, std::vector<int>(n, 0));
   for (auto i : station) {
-    if (i.id_from == t) {
-      c[i.id_from - 1] = 0;
-      d[i.id_from - 1][i.id_to - 1] = i.distance;
-    } else {
-      c[i.id_from - 1] = i.cost;
-      d[i.id_from - 1][i.id_to - 1] = i.distance;
-    }
+    long frID = ids[i.id_from];
+    long toID = ids[i.id_to];
+    c[frID] = i.id_from == t? 0: i.cost;
+    d[frID][toID] = i.distance;
   }
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++)
       E[i][j] = d[i][j] > 0 ? 1 : 0;
+
+  s = ids[s];
+  t = ids[t];
 
   BEST = std::numeric_limits<long>::max();
   try {
@@ -69,7 +85,7 @@ long solve(const vector<StationData> &station,
     }
 
     // Constraints
-    model.addConstr(r[0] == 0);
+    model.addConstr(r[s] == 0);
     for (int i = 0; i < n; i++)
       for (int j = 0; j < n; j++) {
         model.addConstr(x[i][j] <= E[i][j]);
@@ -83,9 +99,9 @@ long solve(const vector<StationData> &station,
           flow_out += x[i][j];
         }
       }
-      if (i == s - 1) {
+      if (i == s) {
         model.addConstr(flow_out - flow_in == 1);
-      } else if (i == t - 1) {
+      } else if (i == t) {
         model.addConstr(flow_in - flow_out == 1);
       } else {
         model.addConstr(flow_in - flow_out == 0);
