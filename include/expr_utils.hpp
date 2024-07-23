@@ -1,5 +1,6 @@
 #include <fstream>
 #include <set>
+#include <string>
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -100,11 +101,18 @@ inline void sanity_checking(rzq::basic::Roadmap &g) {
   // 2. dist(u, v) = dist(v, u)
   for (auto u : g.GetNodes()) {
     for (auto v : g.GetSuccs(u)) {
-      auto c0 = g.GetCost(u, v)[1];
-      auto c1 = g.GetCost(v, u)[1];
-      if (c0 != c1) {
-        fprintf(fp, "Inconsistant dist (%ld, %ld)=%ld, (%ld, %ld)=%ld\n", u, v,
-                c0, v, u, c1);
+      auto euv = g.GetCost(u, v);
+      auto evu = g.GetCost(v, u);
+      if (euv.size() == evu.size() && euv.size() > 0) {
+        auto c0 = euv[1];
+        auto c1 = evu[1];
+        if (c0 != c1) {
+          fprintf(fp, "Inconsistant dist (%ld, %ld)=%ld, (%ld, %ld)=%ld\n", u, v,
+                  c0, v, u, c1);
+        }
+      }
+      else {
+        fprintf(fp, "Edge(%ld, %ld) exists, but Edge(%ld, %ld) does not\n", u, v, v, u);
       }
     }
   }
@@ -124,4 +132,13 @@ inline void build_graph(const std::vector<StationData>& stations, rzq::basic::Ro
     g.AddEdge(i.id_from, i.id_to, cv);
   }
   sanity_checking(g);
+}
+
+inline std::string get_name(const std::string& fpath) {
+  
+  // remove suffix ".csv";
+  std::string res = fpath.substr(0, fpath.size() - 4);
+  // remove parent dir prefix
+  res = res.substr(res.find_last_of('/')+1);
+  return res;
 }

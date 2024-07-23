@@ -1,14 +1,23 @@
 #include <cmath>
 #include <gurobi_c++.h>
 #include <gurobi_c.h>
+#include <iomanip>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
-#include "load_data.hpp"
+#include "expr_utils.hpp"
+
+
+namespace gurobi {
 
 using namespace std;
 
-void solve(const vector<StationData> &station, 
+double RT, TIMELIMIT;
+std::string GFILE;
+long SID, TID, BEST, QMAX, KMAX;
+
+long solve(const vector<StationData> &station, 
            const long s, const long t, const long K, const long Q) {
 
   int n = station.size();
@@ -28,15 +37,18 @@ void solve(const vector<StationData> &station,
     for (int j = 0; j < n; j++)
       E[i][j] = d[i][j] > 0 ? 1 : 0;
 
+  BEST = std::numeric_limits<long>::max();
   try {
 
     // Create an environment
     GRBEnv env = GRBEnv(true);
     env.set("LogFile", "mip1.log");
+    env.set("LogToConsole", "0");
     env.start();
 
     // Create an empty model
     GRBModel model = GRBModel(env);
+    model.set(GRB_DoubleParam_TimeLimit, TIMELIMIT);
 
     // decision varaibles
     vector<vector<GRBVar>> x(n, vector<GRBVar>(n));
@@ -104,6 +116,8 @@ void solve(const vector<StationData> &station,
     }
     model.setObjective(obj, GRB_MINIMIZE);
     model.optimize();
+    BEST = model.get(GRB_DoubleAttr_ObjVal);
+    RT = model.get(GRB_DoubleAttr_Runtime);
 
   } catch (GRBException e) {
     cout << "Error code = " << e.getErrorCode() << endl;
@@ -111,15 +125,22 @@ void solve(const vector<StationData> &station,
   } catch (...) {
     cout << "Exception during optimization" << endl;
   }
-}
+  return BEST;
+} 
+
+};
 
 int main(int argc, char** argv) {
 
-  std::string file = std::string(argv[1]);
-  long s = std::stoi(argv[2]);
-  long t = std::stoi(argv[3]);
-  long K = std::stoi(argv[4]);
-  long Q = std::stoi(argv[5]);
+  using namespace gurobi;
+
+  GFILE = std::string(argv[1]);
+  SID = std::stoi(argv[2]);
+  TID = std::stoi(argv[3]);
+  KMAX = std::stoi(argv[4]);
+  QMAX = std::stoi(argv[5]);
+  TIMELIMIT = 60;
+
   // long K_max = 10;
   // long Q = 6000;
   // long s = 2;
@@ -127,7 +148,15 @@ int main(int argc, char** argv) {
   // long kMax = 5, qMax = 6;
 
   std::vector<StationData> stations;
-  load(file, stations);
-  solve(stations, s, t, K, Q);
+  load(GFILE, stations);
+  solve(stations, SID, TID, KMAX, QMAX);
+
+  cout << " cost = " << BEST << endl;
+
+  string mapname = get_name(GFILE);
+  ofstream fout;
+  fout.open("output/" + mapname + ".log", ios_base::app);
+  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",gurobi," << BEST << "," 
+       << setprecision(4) << RT << endl;
   return 0;
 }
