@@ -84,7 +84,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
 
   // ### init ###
   auto tstart = std::chrono::steady_clock::now();
-  basic::CostVector init_vec(_vec_len, 0);
+  basic::CostVector init_vec(0, _vec_len);
   Label lo(_GenLabelId(), _vo, init_vec, _Heuristic(_vo));
   _label[lo.id] = lo;
   _res.n_generated++;
@@ -153,9 +153,12 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
           q_prime = 0;
           k_prime = l.g[2] + 1;
         } else { // no need to fill
-          g_prime = l.g[0];
-          q_prime = l.g[1] - distV2U;
-          k_prime = l.g[2];
+          // g_prime = l.g[0];
+          // q_prime = l.g[1] - distV2U;
+          // k_prime = l.g[2];
+
+          // reaching a station with no-empty tank is suboptimal
+          continue;
         }
       }
 
@@ -244,8 +247,8 @@ void AstarRefill::_computeReachableSetsV(long v) {
   typedef std::pair<long, long> _Node;
   std::priority_queue<_Node, std::vector<_Node>, std::greater<_Node>> q;
 
-  for (auto v : V)
-    dist[v] = std::numeric_limits<long>::max();
+  for (auto i : V)
+    dist[i] = std::numeric_limits<long>::max();
   dist[v] = 0.0;
   q.push({0, v});
 
@@ -283,8 +286,8 @@ void AstarRefill::_computeReachableSets() {
     }
   }
 
-  // fix issue #5: set target cost to be inf
-  _stationCost[_vd] = std::numeric_limits<long>::max();
+  // fix issue #5: set target cost to be 0
+  _stationCost[_vd] = 0;
 
   // Initialize reachable sets
   for (auto v : _roadmap->GetNodes()) {
