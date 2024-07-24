@@ -35,3 +35,4 @@ gurobi_dir/*
 .cache/*
 .launch.json
 *.log
+*/*.query

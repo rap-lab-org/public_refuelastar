@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 import sys
+import os
 from itertools import product
 import pandas as pd
 
@@ -14,8 +16,7 @@ def run_query(expr, sid, tid, exec):
     subprocess.run(cmd.split())
 
 
-def run_map(expr: str, solvers):
-    import os
+def run_map(expr: str, solvers, query_fn: str=""):
     print(f">>> Running {expr}")
     mapname = expr.removesuffix(".csv").split("/")[-1]
     logdir = "./output"
@@ -26,13 +27,17 @@ def run_map(expr: str, solvers):
     with open(f"{logdir}/{mapname}.log", "w") as f:
         f.write(header + "\n")
     df = pd.read_csv(expr).rename(columns=lambda x: x.strip())
-    ids = set(df["index_from"]) | set(df["index_to"])  # type: ignore
-    for i, j in product(list(ids), list(ids)):
-        if i >= j:
-            continue
-        for solver in solvers:
-            run_query(expr, i, j, f"./build/{solver}")
-            run_query(expr, j, i, f"./build/{solver}")
+
+    if not len(query_fn):
+        ids = set(df["index_from"]) | set(df["index_to"])  # type: ignore
+        queries = list([(i, j) for i, j in product(list(ids), list(ids)) if i != j])
+    else:
+        qdf = pd.read_csv(query_fn)
+        queries = [(row['from'], row['to']) for row in qdf]
+
+    for (i, j), solver in product(queries, solvers):
+        run_query(expr, i, j, f"./build/{solver}")
+        run_query(expr, j, i, f"./build/{solver}")
 
 
 def run_city():
@@ -48,6 +53,8 @@ def run_city():
     ]
     solvers = ["run_refill", "dp"]
     for expr in exprs:
+        qfn = expr.removesuffix(".csv") + ".query"
+        assert os.path.exists(qfn)
         run_map(expr, solvers)
 
 
