@@ -4,7 +4,14 @@ project(emoa)
 # find_package(Boost REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-set(GUROBI_DIR gurobi_dir)
+if (APPLE)
+  set(GUROBI_DIR /Library/gurobi1103/macos_universal2)
+  set(GRBLIB "gurobi110")
+else()
+  # using the 
+  set(GUROBI_DIR gurobi_dir)
+  set(GRBLIB "gurobi100")
+endif()
 # set(orDIR /home/anushtup/Documents/or-tools_amd64_ubuntu-20.04_cpp_v9.8.3296/or-tools_x86_64_Ubuntu-20.04_cpp_v9.8.3296)
 # set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};<path/to/ortools>/lib/cmake/ortools")
 
@@ -35,8 +42,6 @@ foreach(test_cpp_file ${test_cpp_files})
   ADD_EXECUTABLE(${test_cpp_name} ${test_cpp_dir}/${test_cpp_name}.cpp)
   TARGET_LINK_LIBRARIES(${test_cpp_name} 
     ${PROJECT_NAME} 
-    gurobi100
-    gurobi_g++5.2
   )
 endforeach(test_cpp_file ${test_cpp_files})
 
@@ -50,7 +55,13 @@ foreach(exec_cpp_file ${exec_cpp_files})
   ADD_EXECUTABLE(${exec_cpp_name} ${exec_cpp_dir}/${exec_cpp_name}.cpp)
   TARGET_LINK_LIBRARIES(${exec_cpp_name} 
     ${PROJECT_NAME} 
-    gurobi100
-    gurobi_g++5.2
+    # ${GRBLIB}
+    # gurobi_c++
   )
 endforeach(exec_cpp_file ${exec_cpp_files})
+
+target_link_libraries("mip-gurobi" 
+  ${PROJECT_NAME}
+  ${GRBLIB}
+  gurobi_c++
+)
