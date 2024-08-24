@@ -16,7 +16,7 @@ namespace refill {
 
 double RT, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
 rzq::search::EMOAResult res;
 
 long solve(std::string fname, const long s, const long t, const long K, const long Q) {
@@ -38,6 +38,7 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   planner.Search(s, t, TIMELIMIT);
   auto tend = std::chrono::steady_clock::now();
   res = planner.GetResult();
+  NUMSTATE = res.n_generated;
   RT = std::chrono::duration_cast<std::chrono::microseconds>(tend - tstart).count();
 
   for (auto iter : res.paths) {
@@ -68,7 +69,8 @@ int main(int argc, char **argv) {
   string mapname = get_name(GFILE);
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",erca," << BEST << "," 
+  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",erca," 
+       << BEST << "," << NUMSTATE << ","
        << setprecision(4) << RT << endl;
   return 0;
 };

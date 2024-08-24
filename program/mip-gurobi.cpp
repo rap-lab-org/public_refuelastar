@@ -171,7 +171,8 @@ int main(int argc, char** argv) {
   string mapname = get_name(GFILE);
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",gurobi," << BEST << "," 
+  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",gurobi," 
+       << BEST << "," << 0 << ","
        << setprecision(4) << RT << endl;
   return 0;
 }
