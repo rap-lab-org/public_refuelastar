@@ -87,7 +87,7 @@ Result file contains multiple columns of metadata in two categories:
 * Result
     * `best`: best objective found by the solver
     * `size`: number of states have been visited
-    * `runtime`: elapsed time in seconds to find solution (exclude initialization)
+    * `runtime`: elapsed time in micro second (us) to find solution (exclude initialization)
 * Example:
     ```csv
    map,s,t,K,Q,algo,best,size,runtime
