@@ -1,23 +1,24 @@
+#include "expr_utils.hpp"
+#include "graph.hpp"
+#include <cassert>
+#include <chrono>
 #include <iomanip>
 #include <limits>
 #include <queue>
-#include <chrono>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "expr_utils.hpp"
-#include "graph.hpp"
-
 
 namespace dp {
 
-
+using namespace std;
 using Graph = rzq::basic::Roadmap;
 using Sets = std::unordered_map<long, std::unordered_set<long>>;
-using Map = std::unordered_map<long, long>; // m[i] = v
-using Maps = std::unordered_map<long, Map>; // m[i][j] = v
+using Map = std::unordered_map<long, long>;    // m[i] = v
+using Maps = std::unordered_map<long, Map>;    // m[i][j] = v
 using Maps3D = std::unordered_map<long, Maps>; // m[i][j][k] = v
 
+static const long INF = numeric_limits<long>::max();
 
 struct State {
   long k, q, v;
@@ -25,13 +26,13 @@ struct State {
 
 double RT, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
 
-void init_v(long v, long Q, Graph& g, Sets& reachVert, Maps& reachDist) {
+void init_v(long v, long Q, Graph &g, Sets &reachVert, Maps &reachDist) {
   Map dist;
   typedef std::pair<long, long> Node;
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> q;
-  for (auto i: g.GetNodes())
+  for (auto i : g.GetNodes())
     dist[i] = std::numeric_limits<long>::max();
   dist[v] = 0;
   q.push({0, v});
@@ -59,35 +60,197 @@ void init_v(long v, long Q, Graph& g, Sets& reachVert, Maps& reachDist) {
   }
 }
 
-void init(long t, long Q, Graph& g, Map& Cost, Sets& reachVert, Maps& reachDist) {
+void init(long t, long Q, Graph &g, Map &Cost, Sets &reachVert,
+          Maps &reachDist) {
   Cost.clear();
-  for (auto v: g.GetNodes()) {
-    for (auto u: g.GetSuccs(v)) {
+  for (auto v : g.GetNodes()) {
+    for (auto u : g.GetSuccs(v)) {
       Cost[v] = g.GetCost(v, u)[0];
       break;
     }
   }
   Cost[t] = 0;
 
-  for (auto v: g.GetNodes()) {
+  for (auto v : g.GetNodes()) {
     reachVert[v] = {};
     reachDist[v] = {};
     init_v(v, Q, g, reachVert, reachDist);
   }
 }
 
-
-long getG(Maps3D& dp, int k, int q, int v) {
-  if (dp.find(k) == dp.end() ||
-      dp.at(k).find(q) == dp.at(k).end() ||
-      dp.at(k).at(q).find(v) == dp.at(k).at(q).end()) {
-    return std::numeric_limits<long>::max();
-  }
-  return dp.at(k).at(q).at(v);
+long getVal(const Maps3D &dp, long u, long q, long g) {
+  if (dp.find(u) == dp.end() || dp.at(u).find(q) == dp.at(u).end() ||
+      dp.at(u).at(q).find(g) == dp.at(u).at(q).end())
+    return INF;
+  return dp.at(u).at(q).at(g);
 }
 
+long add(long a, long b) {
+  if (a == INF || b == INF)
+    return INF;
+  return a + b;
+}
 
-long solve(const std::vector<StationData>& stations, const long s, const long t, const long K, const long Q) {
+void fill_table_Qn3(const Graph &gr, const Sets &reachVs, const Sets &predVs,
+                    const Maps &reachDist, const Map &c, const long s,
+                    const long t, const long Q, const long U,
+                    const unordered_map<long, set<long>> &GV, Maps3D &dp) {
+
+  // fill rows
+  // O(Q * n^3) version
+  for (int q = 1; q <= Q; q++) {
+    for (auto u : gr.GetNodes())
+      if (u != t) {
+        // ensure dp.at(u).at(q) is not null
+        dp[u][q] = {};
+        for (auto g : GV.at(u)) {
+          for (auto v : reachVs.at(u))
+            if (v != u) {
+              long distuv = reachDist.at(u).at(v);
+              long g_at_v = c.at(u) < c.at(v) ? U - distuv : 0;
+              long cost_vt = getVal(dp, v, q - 1, g_at_v);
+              if (cost_vt == INF)
+                continue;
+              long cost_uv;
+              if (c.at(u) < c.at(v))
+                cost_uv = (U - g) * c.at(u);
+              else if (distuv >= g)
+                cost_uv = (distuv - g) * c.at(u);
+              else
+                continue;
+
+              NUMSTATE++;
+              long exist = getVal(dp, u, q, g);
+              if (exist > cost_uv + cost_vt) {
+                dp[u][q][g] = cost_uv + cost_vt;
+
+                // printf("dp[%ld][%d][%ld]=%ld, getting from dp[%ld][%d][%ld] (% "
+                //        "ld)\n ",
+                //        u, q, g, cost_uv + cost_vt, v, q - 1, g_at_v,
+                //        dp[v][q - 1][g_at_v]);
+                if (u == s && g == 0)
+                  BEST = min(BEST, dp[u][q][g]);
+              }
+            }
+        }
+      }
+  }
+
+  // print g
+  // for (auto u : gr.GetNodes()) {
+  //   for (auto v : reachVs[u])
+  //     printf(" %ld %ld %ld\n", u, v, reachDist[u][v]);
+  // }
+}
+
+void fill_table_Qnlogn(const Graph &gr, const Sets &reachVs, const Sets &predVs,
+                       const Maps &reachDist, const Map &c, const long s,
+                       const long t, const long Q, const long U,
+                       const unordered_map<long, set<long>> &GV, Maps3D &dp) {
+
+  // O(Q*n^2*logn) version
+
+  for (int q = 1; q <= Q; q++) {
+    for (auto u : gr.GetNodes())
+      if (u != t) {
+        // printf("GV(%ld): ", u);
+        // for (auto g : GV[u])
+        //   printf("%ld ", g);
+        // printf("\n");
+        // ensure dp.at(u).at(q) is not null
+        dp[u][q] = {};
+        vector<pair<long, long>> indVs;
+        long indVar;
+        for (auto v : reachVs.at(u))
+          if (v != u) {
+            if (c.at(u) < c.at(v)) {
+              indVar = add(getVal(dp, v, q - 1, U - reachDist.at(u).at(v)),
+                           U * c.at(u));
+            } else
+              indVar =
+                  add(getVal(dp, v, q - 1, 0), reachDist.at(u).at(v) * c.at(u));
+            if (indVar != INF)
+              indVs.push_back({indVar, v});
+          }
+        sort(indVs.begin(), indVs.end());
+        int i = 0, v;
+        for (auto g : GV.at(u)) {
+          while (i < indVs.size()) {
+            v = indVs[i].second;
+            if (g > reachDist.at(u).at(v))
+              i++;
+            else
+              break;
+          }
+          if (i < indVs.size()) {
+            long gp = c.at(u) < c.at(v) ? U - reachDist.at(u).at(v) : 0;
+            // printf("dp[%ld][%d][%ld]=%ld, getting from dp[%d][%d][%ld]
+            // (%ld)\n",
+            //        u, q, g, indVs[i].first - g * c[u], v, q - 1, gp,
+            //        dp[v][q - 1][gp]);
+            dp[u][q][g] = indVs[i].first - g * c.at(u);
+            NUMSTATE++;
+            assert(indVs[i].first - g * c.at(u) >= 0);
+            if (u == s and g == 0)
+              BEST = min(BEST, dp[u][q][g]);
+          }
+        }
+      }
+  }
+}
+
+long solve_table(const std::vector<StationData> &stations, const long s,
+                 const long t, const long Q, const long U) {
+  // variable names are consist with the paper 'to fill or not to fill'
+  // s, t: start and target
+  // Q: max stop
+  // U: max capacity
+  Graph gr;
+  Sets reachVs, predVs;
+  Maps reachDist;
+  Map c; // cost on each station
+  build_graph(stations, gr);
+
+  auto tstart = std::chrono::steady_clock::now();
+
+  init(t, U, gr, c, reachVs, reachDist);
+  for (auto u : gr.GetNodes()) {
+    for (auto v : reachVs[u]) {
+      predVs[v].insert(u);
+    }
+  }
+  unordered_map<long, set<long>> GV;
+  for (auto u : gr.GetNodes()) {
+    GV[u] = {0};
+    for (auto v : predVs[u]) {
+      if (c[u] > c[v]) {
+        GV[u].insert(U - reachDist[u][v]);
+      }
+    }
+  }
+
+  // state: dp[v][q][g] min cost from v to t, starting with g gas, using q stops
+  // including v dp(v, q, g) =
+  // 1. dp(v', q-1, 0) + c(v) * (d(v, v')-g) <-- if c(v) > c(v');
+  // 2. dp(v', q-1, U-d(v, v')) + c(v) * (U - g) <--- if c(v) < c(v')
+  Maps3D dp;
+  NUMSTATE = 1;
+  BEST = std::numeric_limits<long>::max();
+  // init
+  dp[t][0][0] = 0;
+  c[t] = 0;
+
+  fill_table_Qn3(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
+  // fill_table_Qnlogn(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
+
+  auto tnow = std::chrono::steady_clock::now();
+  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart)
+           .count();
+  return BEST;
+}
+
+long solve_bfs(const std::vector<StationData> &stations, const long s,
+               const long t, const long K, const long Q) {
   Graph g;
   Sets reachVs;
   Maps reachDist;
@@ -99,17 +262,20 @@ long solve(const std::vector<StationData>& stations, const long s, const long t,
   dp[0][0][s] = 0;
   std::queue<State> q;
   q.push({0, 0, s});
+  NUMSTATE = 1;
 
   BEST = std::numeric_limits<long>::max();
 
   auto tstart = std::chrono::steady_clock::now();
 
   while (!q.empty()) {
-    auto c = q.front(); q.pop();
+    auto c = q.front();
+    q.pop();
     long costCur = stationCost[c.v];
     long gCur = dp[c.k][c.q][c.v];
     if (c.k > KMAX)
-      continue;;
+      continue;
+    ;
     if (c.v == t)
       BEST = std::min(BEST, gCur);
 
@@ -118,7 +284,7 @@ long solve(const std::vector<StationData>& stations, const long s, const long t,
       break;
     }
 
-    for (auto nxt: reachVs[c.v]) {
+    for (auto nxt : reachVs[c.v]) {
       long costNxt = stationCost[nxt];
       long dist = reachDist[c.v][nxt];
       long qNxt, gNxt, kNxt;
@@ -131,13 +297,13 @@ long solve(const std::vector<StationData>& stations, const long s, const long t,
           qNxt = 0;
           kNxt = c.k + 1;
           gNxt = gCur + (dist - c.q) * costCur;
-        }
-        else {
+        } else {
           // reaching a station with non-empty tank is not optimal
           continue;
         }
       }
-      if (getG(dp, kNxt, qNxt, nxt) > gNxt) {
+      ++NUMSTATE;
+      if (getVal(dp, kNxt, qNxt, nxt) > gNxt) {
         dp[kNxt][qNxt][nxt] = gNxt;
         q.push({kNxt, qNxt, nxt});
       }
@@ -145,11 +311,12 @@ long solve(const std::vector<StationData>& stations, const long s, const long t,
   }
 
   auto tnow = std::chrono::steady_clock::now();
-  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart).count();
+  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart)
+           .count();
   return BEST;
 }
 
-}
+} // namespace dp
 
 int main(int argc, char **argv) {
   using namespace dp;
@@ -163,12 +330,14 @@ int main(int argc, char **argv) {
 
   std::vector<StationData> stations;
   load(GFILE, stations);
-  solve(stations, SID, TID, KMAX, QMAX);
+  // solve_bfs(stations, SID, TID, KMAX, QMAX);
+  solve_table(stations, SID, TID, KMAX, QMAX);
 
   cout << " cost = " << BEST << endl;
   string mapname = get_name(GFILE);
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",dp," << BEST << "," 
-       << setprecision(4) << RT << endl;
+  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
+       << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
+       << endl;
 }

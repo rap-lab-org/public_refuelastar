@@ -20,7 +20,7 @@ def run_map(expr: str, solvers, query_fn: str=""):
     print(f">>> Running {expr}")
     mapname = expr.removesuffix(".csv").split("/")[-1]
     logdir = "./output"
-    header = "map,s,t,K,Q,algo,best,runtime"
+    header = "map,s,t,K,Q,algo,best,size,runtime"
 
     if not os.path.exists("./output"):
         os.makedirs("output")
@@ -33,7 +33,7 @@ def run_map(expr: str, solvers, query_fn: str=""):
         queries = list([(i, j) for i, j in product(list(ids), list(ids)) if i != j])
     else:
         qdf = pd.read_csv(query_fn)
-        queries = [(row['from'], row['to']) for row in qdf]
+        queries = [(row['from'], row['to']) for _, row in qdf.iterrows()]
 
     for (i, j), solver in product(queries, solvers):
         run_query(expr, i, j, f"./build/{solver}")
@@ -55,7 +55,7 @@ def run_city():
     for expr in exprs:
         qfn = expr.removesuffix(".csv") + ".query"
         assert os.path.exists(qfn)
-        run_map(expr, solvers)
+        run_map(expr, solvers, query_fn=qfn)
 
 
 def run_small():
@@ -70,7 +70,11 @@ def run_small():
         "./small-data/graph_data5.csv",
     ]
 
-    solvers = ["dp", "run_refill", "mip-gurobi"]
+    solvers = [
+        "dp", 
+        "run_refill", 
+        # "mip-gurobi"
+    ]
     for expr in exprs:
         run_map(expr, solvers)
 
