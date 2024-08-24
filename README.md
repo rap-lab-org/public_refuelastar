@@ -15,23 +15,22 @@ SOFTWARE.
 
 * We use CMake (3.16.3) and Make (4.2.1) to compile the code. Lower or higher version may also work.
 * Optional:
-    * CPLEX Academic Version
     * Gurobi Academic Version
 
 ## Project Structure
 
 * `README.md` - This file
 * `source/` - Contains the path planning source code
-* `test/` - Contains example code for path planning algorithms
+* `program/` - Contains example code for path planning algorithms
 * `include/` - Contains header files
-* `City data/` - Contains sample graph files and sample result files
+* `small-data/` - Contains sample graph files
+* `city-data/` - Contains city graph files for experiment
 
 ## Instructions:
 
 ### Installation
 
 * Clone this repo
-* Install CPLEX C++ library (optional)
 * Install Gurobi C++ library(optional)
     * create a folder to store Gurobi header and library: `mkdir gurobi_dir`
     * [download version 10](https://www.gurobi.com/downloads/gurobi-software/)
@@ -52,40 +51,48 @@ SOFTWARE.
         └── src/
     ```
 * Compile this repo
-  * `mkdir build`
-  * `cd build`
-  * `cmake .. -DCMAKE_BUILD_TYPE=release` (You can specify the build type you like by adding different args)
-  * `make`
+    * `make fast`: compile the project using `-DCMAKE_BUILD_TYPE=release` flag
+    * `make dev`: compile the project using `-DCMAKE_BUILD_TYPE=debug` flag
 
 ### Command-Line Interface (CLI)
 
 * Run example via command-line interface (CLI)
-  * `cd build/`
-  * `./run_erca 1 5 60 3 ../data/ex1-c1.gr ../data/ex1-c2.gr ../data/ex1-c3.gr 10 9 ../data/result.txt`
-  * Runs ERCA\* on 3-cost graph (edge weights detailed in `data/ex1-c1.txt`, `data/ex1-c2.txt`, `data/ex1-c3.txt`) to find solutions from node 1 to node 5 with a 60 second time limit, and saves results into `data/result.txt`. The cost to be minimized is defined in `data/ex1-c1.txt` while the two types of resource are defined in `data/ex1-c2.txt` and `data/ex1-c3.txt`. The resource limits are 10 and 9 respectively.
-* General usage of the command-line interface
-  * `./run_erca (arg1 v_start) (arg2 v_dest) (arg3 time_limit) (arg4 M) (arg5 graph1_file_path) (arg6 graph2_file_path) ... ((arg(M+4) graphM_file_path)) (arg(M+4+1) resource limit 1) (arg(M+4+2) resource limit 2) ... (arg(M+4+M-1) resource limit M-1) (arg(M+4+M) result_path)`
-  * arg1 v_start = the starting node
-  * arg2 v_dest = the destination node
-  * arg3 time_limit = the time limit for ERCA\*
-  * arg4 M = the number of criteria (including both the minimizing objective and all types of resource) for the input instance
-  * arg5~arg(M+4) = the paths to M files that describe the graph, where each file contains the edge weights for one type of edge cost/resource in the graph (details about file structure are specified below)
-  * arg(M+4+1)~arg(M+4+M-1) = the resource limits
-  * arg(M+4+M) = the result file path
-* For help info `./run_erca -h` or `./run_emoa --help`
+    * TL,DR: 
+        * `./build/dp ./small-data/graph_data.csv 5 1 3 8`, or;
+        * `./build/run_refill ./city-data/Phil_gas.csv 58 39 10 60000`
+    * All commands are in format `<exec> <map> <start> <target> <K> <Q>`, where:
+        * `<expr>` are one of solver: 
+            * `./build/dp`: the Dynamic Programming method
+            * `./build/run_refill`: `ERCA*`, the proposed method
+            * `./build/mip-gurobi`: the MIP model by Gurobi solver
+        * `<map>` map files in `./small-data` or `./city-data`
+        * `<start>, <target>`: vertex id of start and target location
+        * `<K>`: max number of stops
+        * `<Q>`: max capacity of tank
 
+### Run experiments
+* `run_expr.py` run multiple instances and save result in `./output`
+    * `./run_expr.py small`: run experiment on all maps in `./small-data`
+    * `./run_expr.py city`: run experiment on all maps in `./city-data`
+* `./validator.py output`: validate all result in `./output`
 
 ### Graph file specification
 The graph files are all `.csv` files which were constructed usign the OpenStreetMap dataset queried using `osmnx` library in python. The files have the following columns: `Gas_node_from` (Station ID of the gas node we are travelling from as in the OpenStreetMap), `Gas_node_to` (station ID of the gas node we are travelling to as in OpenStreetMap), `distance` (in meters), `cost` (the cost of refuelling 1 unit of gas at that station), `index_from` and `index_to` (for ease of indexing to store the graph data in our graph datastructure).
 
-### Result file specifiction
+### Result file specification
 
-Result file contains multiple lines of metadata: 
-* rt_initHeu = runtime to initialize heuristics
-* rt_search = runtime to conduct the search
-* timeout = if the planner times out
-* N = the number of solutions found, which is always one.
-
-The computed solution is then listed in three lines:
-
-
+Result file contains multiple columns of metadata in two categories: 
+* Problem input:
+    * `map s t K Q alg` 
+* Result
+    * `best`: best objective found by the solver
+    * `size`: number of states have been visited
+    * `runtime`: elapsed time in seconds to find solution (exclude initialization)
+* Example:
+    ```csv
+   map,s,t,K,Q,algo,best,size,runtime
+   Phil_gas,58,39,10,60000,erca,2237892,1016,1.326e+04
+   Phil_gas,39,58,10,60000,erca,2134697,539,1.294e+04
+   Phil_gas,58,39,10,60000,dp,2237892,1334182,7.732e+04
+   Phil_gas,39,58,10,60000,dp,2134697,1369647,7.743e+04
+    ```

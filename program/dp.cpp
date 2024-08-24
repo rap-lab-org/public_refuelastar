@@ -240,8 +240,8 @@ long solve_table(const std::vector<StationData> &stations, const long s,
   dp[t][0][0] = 0;
   c[t] = 0;
 
-  fill_table_Qn3(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
-  // fill_table_Qnlogn(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
+  // fill_table_Qn3(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
+  fill_table_Qnlogn(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
 
   auto tnow = std::chrono::steady_clock::now();
   RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart)
