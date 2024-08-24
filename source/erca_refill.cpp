@@ -148,7 +148,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
         assert(_q_max >= distV2U);
         k_prime = l.g[2] + 1;
       } else {                  // Lemma 1: fill up enough to reach vertex u
-        if (distV2U > l.g[1]) { // need to fill
+        if (distV2U >= l.g[1]) { // need to fill
           g_prime = l.g[0] + (distV2U - l.g[1]) * costV;
           q_prime = 0;
           k_prime = l.g[2] + 1;
