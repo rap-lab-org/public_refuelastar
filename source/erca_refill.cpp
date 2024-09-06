@@ -75,10 +75,12 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   _vo = vo;
   _vd = vd;
 
+	// preprocessing for all queries, which can be amortized
+	// so we don't count it in elapsed time
+  _computeReachableSets();
   // ### init heu and compute reachable sets ###
   auto t1 = std::chrono::steady_clock::now();
   InitHeu(vd); // use the same one as in EMOAKd (EMOA).
-  _computeReachableSets();
   auto t2 = std::chrono::steady_clock::now();
   _res.rt_initHeu = std::chrono::duration<double>(t2 - t1).count();
 
@@ -120,6 +122,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
                            // so that later _PostProcRes() will work correctly.
 
     if (l.v == _vd) {
+			_res.rt_search = std::chrono::duration<double>(tnow - tstart).count();
       break; // [DIFF FROM EMOA]
     }
 
@@ -184,10 +187,10 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   _PostProcRes();
   auto e = std::chrono::steady_clock::now();
 
-  std::cout
-      << "Elapsed time in microseconds: "
-      << std::chrono::duration_cast<std::chrono::microseconds>(e - s).count()
-      << " us" << std::endl;
+  // std::cout
+  //     << "Elapsed time in microseconds: "
+  //     << std::chrono::duration_cast<std::chrono::microseconds>(e - s).count()
+  //     << " us" << std::endl;
 
   return 1;
 };

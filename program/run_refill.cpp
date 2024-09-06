@@ -9,12 +9,13 @@
 #include <iomanip>
 #include <chrono>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 namespace refill {
 
-double RT, TIMELIMIT;
+double RT, RTINIT, TIMELIMIT;
 std::string GFILE;
 long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
 rzq::search::EMOAResult res;
@@ -39,11 +40,11 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   auto tend = std::chrono::steady_clock::now();
   res = planner.GetResult();
   NUMSTATE = res.n_generated;
-  RT = std::chrono::duration_cast<std::chrono::microseconds>(tend - tstart).count();
+  RT = res.rt_search + res.rt_initHeu;
+	RTINIT = res.rt_initHeu;
 
   for (auto iter : res.paths) {
     long k = iter.first; // id of a Pareto-optipmal solution
-    std::cout << " cost = " << res.costs[k] << std::endl;
     BEST = res.costs[k][0];
   }
   return BEST;
@@ -67,10 +68,13 @@ int main(int argc, char **argv) {
   solve(GFILE, SID, TID, KMAX, QMAX);
 
   string mapname = get_name(GFILE);
+	stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",erca," 
+  row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",erca," 
        << BEST << "," << NUMSTATE << ","
-       << setprecision(4) << RT << endl;
+       << setprecision(4) << RT << "," << RTINIT;
+	fout << row.str() << endl;
+	cout << row.str() << endl;
   return 0;
 };

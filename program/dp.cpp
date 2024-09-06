@@ -24,7 +24,7 @@ struct State {
   long k, q, v;
 };
 
-double RT, TIMELIMIT;
+double RT, RTINIT, TIMELIMIT;
 std::string GFILE;
 long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
 long BEST_STOP;
@@ -130,10 +130,9 @@ void fill_table_Qn3(const Graph &gr, const Sets &reachVs, const Sets &predVs,
 
                 if (u == s && g == 0 && BEST > dp[u][q][g]) {
                   // printf(
-                  //     "dp[%ld][%d][%ld]=%ld, getting from dp[%ld][%d][%ld] (% "
-                  //     "ld)\n ",
-                  //     u, q, g, cost_uv + cost_vt, v, q - 1, g_at_v,
-                  //     dp[v][q - 1][g_at_v]);
+                  //     "dp[%ld][%d][%ld]=%ld, getting from dp[%ld][%d][%ld] (%
+                  //     " "ld)\n ", u, q, g, cost_uv + cost_vt, v, q - 1,
+                  //     g_at_v, dp[v][q - 1][g_at_v]);
                   BEST = dp[u][q][g];
                   BEST_STOP = q;
                 }
@@ -220,8 +219,8 @@ long solve_table(const std::vector<StationData> &stations, const long s,
   Map c; // cost on each station
   build_graph(stations, gr);
 
-  auto tstart = std::chrono::steady_clock::now();
-
+	// preprocessing for all queries, which can be amortized
+	// so we don't count it in elapsed time
   init(t, U, gr, c, reachVs, reachDist);
   for (auto u : gr.GetNodes()) {
     for (auto v : reachVs[u]) { // edge: u -> v
@@ -237,7 +236,9 @@ long solve_table(const std::vector<StationData> &stations, const long s,
       }
     }
   }
+  auto tstart = std::chrono::steady_clock::now();
 
+  RTINIT = 0;
   // state: dp[v][q][g] min cost from v to t, starting with g gas, using q stops
   // including v dp(v, q, g) =
   // 1. dp(v', q-1, 0) + c(v) * (d(v, v')-g) <-- if c(v) > c(v');
@@ -252,8 +253,7 @@ long solve_table(const std::vector<StationData> &stations, const long s,
   fill_table_Qnlogn(gr, reachVs, predVs, reachDist, c, s, t, Q, U, GV, dp);
 
   auto tnow = std::chrono::steady_clock::now();
-  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart)
-           .count();
+  RT = std::chrono::duration<double>(tnow - tstart).count();
   return BEST;
 }
 
@@ -321,8 +321,7 @@ long solve_bfs(const std::vector<StationData> &stations, const long s,
   }
 
   auto tnow = std::chrono::steady_clock::now();
-  RT = std::chrono::duration_cast<std::chrono::microseconds>(tnow - tstart)
-           .count();
+  RT = std::chrono::duration<double>(tnow - tstart).count();
   return BEST;
 }
 
@@ -343,12 +342,13 @@ int main(int argc, char **argv) {
   // solve_bfs(stations, SID, TID, KMAX, QMAX);
   solve_table(stations, SID, TID, KMAX, QMAX);
 
-  cout << " cost = " << BEST << ", stop = " << BEST_STOP
-       << ", size = " << NUMSTATE << endl;
   string mapname = get_name(GFILE);
+  stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
-       << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
-       << endl;
+  row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
+      << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
+      << "," << RTINIT;
+  fout << row.str() << endl;
+  cout << row.str() << endl;
 }
