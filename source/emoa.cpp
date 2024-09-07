@@ -244,7 +244,7 @@ void EMOA::SetGraphPtr(basic::Graph* g) {
 void EMOA::InitHeu(long vd) {
   auto tstart = std::chrono::steady_clock::now();
   _dijks.resize(_graph->GetCostDim());
-  for (size_t i = 0; i<_graph->GetCostDim(); i++) {
+  for (size_t i = 0; i<1; i++) {
     _dijks[i].SetGraphPtr(_graph);
     _dijks[i].Search(vd, i);
   }
@@ -355,6 +355,8 @@ basic::CostVector EMOA::_Heuristic(long v) {
     if (out[cdim] < 0) {
       throw std::runtime_error( "[ERROR], unavailable heuristic !?" );
     }
+		// In this specific project, we only need to get the first value
+		break;
   }
   //std::cout << " h(" << v << ") = " << out << std::endl;
   return out;
