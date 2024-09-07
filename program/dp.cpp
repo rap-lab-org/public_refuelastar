@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <limits>
 #include <queue>
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -346,6 +347,9 @@ int main(int argc, char **argv) {
   stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
+	// s -> us
+	RT *= 1e6;
+	RTINIT *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
       << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
       << "," << RTINIT;
