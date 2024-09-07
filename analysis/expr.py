@@ -34,22 +34,6 @@ df['stations'] = df['map'].map(snums)
 df.head()
 
 # %%
-tmp = df[df['algo'] == 'dp']
-tmp.groupby('map')['runtime'].describe().round(2)
-
-# %%
-ax = sns.lineplot(data=df, x='stations', y='runtime', hue='algo', style='algo', markers=True)
-ax.set_yscale('log')
-ax.set_xscale('log')
-ax.set_ylabel("Runtime (us)")
-
-# %%
-ax = sns.lineplot(data=df, x='stations', y='size', hue='algo', style='algo', markers=True)
-ax.set_yscale('log')
-ax.set_xscale('log')
-ax.set_ylabel("Size")
-
-# %%
 index = ['map', 's', 't', 'K', 'Q']
 erca = df[df['algo'] == 'erca'].set_index(index).drop(columns=['algo', 'best'])
 dp = df[df['algo'] == 'dp'].set_index(index).drop(columns=['algo', 'best'])
@@ -60,5 +44,31 @@ erca['ratio'].describe().to_frame().T.round(4)
 
 # %%
 (dp / erca).groupby('map')[['size', 'runtime']].describe().round(2)
+
+# %%
+dp['speedup'] = dp['runtime'] / erca['runtime']
+df['runtime_ms'] = df['runtime'] / 1e3
+speedup = dp.reset_index().drop(columns=['s','t','K','Q','size','init_time'])
+speedup.head()
+
+# %%
+# tmp = df[df['algo'] == 'dp']
+# tmp.groupby('map')['runtime'].describe().round(2)
+
+ax2 = sns.lineplot(data=speedup, x='stations', y='speedup', color='green', alpha=0.5, label='dp/erca',
+             linewidth=1)
+ax2.set_ylim(1, 5)
+ax = ax2.twinx()
+sns.lineplot(ax=ax, data=df, x='stations', y='runtime_ms', hue='algo', style='algo', markers=True)
+# ax.set_yscale('log')
+# ax.set_xscale('log')
+ax.set_ylabel("Runtime (ms)")
+ax2.legend(loc='upper left')
+ax.legend(loc='lower right')
+
+# %%
+ax = sns.lineplot(data=df, x='stations', y='size', hue='algo', style='algo', markers=True)
+ax.set_yscale('log')
+ax.set_ylabel("Size")
 
 

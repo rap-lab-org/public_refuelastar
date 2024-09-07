@@ -36,3 +36,4 @@ gurobi_dir/*
 .launch.json
 *.log
 */*.query
+*/*.ipynb
