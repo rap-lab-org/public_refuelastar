@@ -4,10 +4,10 @@
  *******************************************/
 
 #include "erca_refill.hpp"
-#include "graph.hpp"
 #include "expr_utils.hpp"
-#include <iomanip>
+#include "graph.hpp"
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -17,10 +17,11 @@ namespace refill {
 
 double RT, RTINIT, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HW;
 rzq::search::EMOAResult res;
 
-long solve(std::string fname, const long s, const long t, const long K, const long Q) {
+long solve(std::string fname, const long s, const long t, const long K,
+           const long Q, const long heurW = 1) {
 
   rzq::basic::Roadmap g; // declare a graph
   std::vector<StationData> stations;
@@ -34,6 +35,7 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   planner.SetRoadmap(&g);
   planner.SetQmax(Q);
   planner.SetKmax(K);
+  planner.heurW = heurW; // whether use heuristic
 
   auto tstart = std::chrono::steady_clock::now();
   planner.Search(s, t, TIMELIMIT);
@@ -41,7 +43,7 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   res = planner.GetResult();
   NUMSTATE = res.n_generated;
   RT = res.rt_search + res.rt_initHeu;
-	RTINIT = res.rt_initHeu;
+  RTINIT = res.rt_initHeu;
 
   for (auto iter : res.paths) {
     long k = iter.first; // id of a Pareto-optipmal solution
@@ -50,7 +52,7 @@ long solve(std::string fname, const long s, const long t, const long K, const lo
   return BEST;
 }
 
-}
+} // namespace refill
 
 int main(int argc, char **argv) {
   // long vo1 = 2;
@@ -63,21 +65,23 @@ int main(int argc, char **argv) {
   TID = std::stoi(argv[3]);
   KMAX = std::stoi(argv[4]);
   QMAX = std::stoi(argv[5]);
+	HW = argc > 6? std::stoi(argv[6]): 1;
   TIMELIMIT = 60;
   // long kMax = 5, qMax = 6;
-  solve(GFILE, SID, TID, KMAX, QMAX);
+  solve(GFILE, SID, TID, KMAX, QMAX, HW);
 
   string mapname = get_name(GFILE);
-	stringstream row;
+  string ALGO = HW==0? "erca-noh": "erca";
+  stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-	// s -> us
-	RT *= 1e6;
-	RTINIT *= 1e6;
-  row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",erca," 
-       << BEST << "," << NUMSTATE << ","
-       << setprecision(4) << RT << "," << RTINIT;
-	fout << row.str() << endl;
-	cout << row.str() << endl;
+  // s -> us
+  RT *= 1e6;
+  RTINIT *= 1e6;
+  row << mapname << "," << SID << "," << TID << "," << KMAX << "," 
+		  << QMAX << "," << ALGO << "," << BEST << "," << NUMSTATE << "," 
+			<< setprecision(4) << RT << "," << RTINIT;
+  fout << row.str() << endl;
+  cout << row.str() << endl;
   return 0;
 };

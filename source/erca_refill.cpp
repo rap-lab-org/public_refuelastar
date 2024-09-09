@@ -80,7 +80,9 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   _computeReachableSets();
   // ### init heu and compute reachable sets ###
   auto t1 = std::chrono::steady_clock::now();
-  InitHeu(vd); // use the same one as in EMOAKd (EMOA).
+	if (this->heurW > 0) {
+		InitHeu(vd); // use the same one as in EMOAKd (EMOA).
+	}
   auto t2 = std::chrono::steady_clock::now();
   _res.rt_initHeu = std::chrono::duration<double>(t2 - t1).count();
 
@@ -210,6 +212,9 @@ void AstarRefill::SetQmax(long qm) { _q_max = qm; };
 void AstarRefill::SetKmax(long km) { _k_max = km; };
 
 basic::CostVector AstarRefill::_Heuristic(long v) {
+	if (this->heurW == 0) {
+		return basic::CostVector(std::vector<long>{0, 0});
+	}
   basic::CostVector out;
   out.resize(_vec_len, 0);
   out[0] = EMOA::_Heuristic(v)[0];

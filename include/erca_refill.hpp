@@ -64,6 +64,7 @@ public:
   // virtual void SetKmax(long km);
 
   long alg_iter = 0;
+	long heurW = 1;
 
 protected:
   virtual basic::CostVector _Heuristic(long v) override;

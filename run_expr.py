@@ -15,6 +15,10 @@ def run_query(expr, sid, tid, exec):
     print(f"Run [{cmd}]")
     subprocess.run(cmd.split())
 
+    cmd = f"{exec} {expr} {sid} {tid} {K} {Q} {0}"
+    print(f"Run [{cmd}]")
+    subprocess.run(cmd.split())
+
 
 def run_map(expr: str, solvers, query_fn: str=""):
     print(f">>> Running {expr}")
