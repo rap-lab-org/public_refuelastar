@@ -36,6 +36,9 @@ long solve(std::string fname, const long s, const long t, const long K,
   planner.SetQmax(Q);
   planner.SetKmax(K);
   planner.heurW = heurW; // whether use heuristic
+	// set minPrice to compute heuristic
+	for (const auto& station: stations)
+		planner.minPrice = std::min(planner.minPrice, station.cost);
 
   auto tstart = std::chrono::steady_clock::now();
   planner.Search(s, t, TIMELIMIT);

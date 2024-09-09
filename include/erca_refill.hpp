@@ -8,6 +8,7 @@
 #define SEARCH_ERCA_REFILL_H_
 
 #include "erca.hpp"
+#include <limits>
 
 namespace rzq {
 namespace search {
@@ -65,6 +66,7 @@ public:
 
   long alg_iter = 0;
 	long heurW = 1;
+	long minPrice = std::numeric_limits<long>::max();
 
 protected:
   virtual basic::CostVector _Heuristic(long v) override;

@@ -213,11 +213,11 @@ void AstarRefill::SetKmax(long km) { _k_max = km; };
 
 basic::CostVector AstarRefill::_Heuristic(long v) {
 	if (this->heurW == 0) {
-		return basic::CostVector(std::vector<long>{0, 0});
+		return basic::CostVector(std::vector<long>(_vec_len, 0));
 	}
   basic::CostVector out;
   out.resize(_vec_len, 0);
-  out[0] = EMOA::_Heuristic(v)[0];
+  out[0] = EMOA::_Heuristic(v)[1] * this->minPrice; // this is the distance field!
   return out;
 };
 

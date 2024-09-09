@@ -14,6 +14,10 @@ def check(df: pd.DataFrame):
         print(t[t['dp'] != t['erca']])
         # assert False
 
+    n, _ = t[t['dp'] != t['erca-noh']].shape
+    if n > 0:
+        print(t[t['dp'] != t['erca-noh']])
+
 def check_all(dirname: str):
     logs = [i for i in os.listdir(dirname) if i.endswith(".log")]
     for log in logs:
