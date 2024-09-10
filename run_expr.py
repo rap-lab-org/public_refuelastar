@@ -8,16 +8,17 @@ K = 3
 Q = 8
 
 
-def run_query(expr, sid, tid, exec):
+def run_query(expr: str, sid: int, tid: int, exec: str):
     import subprocess
 
     cmd = f"{exec} {expr} {sid} {tid} {K} {Q}"
     print(f"Run [{cmd}]")
     subprocess.run(cmd.split())
 
-    cmd = f"{exec} {expr} {sid} {tid} {K} {Q} {0}"
-    print(f"Run [{cmd}]")
-    subprocess.run(cmd.split())
+    if exec.endswith("run_refill"):
+        cmd = f"{exec} {expr} {sid} {tid} {K} {Q} {0}"
+        print(f"Run [{cmd}]")
+        subprocess.run(cmd.split())
 
 
 def run_map(expr: str, solvers, query_fn: str=""):
