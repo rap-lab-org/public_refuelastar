@@ -52,6 +52,7 @@ long solve(const vector<StationData> &station,
   s = ids[s];
   t = ids[t];
 
+  auto tstart = std::chrono::steady_clock::now();
   BEST = std::numeric_limits<long>::max();
   try {
 
@@ -132,14 +133,14 @@ long solve(const vector<StationData> &station,
     model.setObjective(obj, GRB_MINIMIZE);
     model.optimize();
     BEST = model.get(GRB_DoubleAttr_ObjVal);
-    RT = model.get(GRB_DoubleAttr_Runtime);
-
   } catch (GRBException e) {
     cout << "Error code = " << e.getErrorCode() << endl;
     cout << e.getMessage() << endl;
   } catch (...) {
     cout << "Exception during optimization" << endl;
   }
+  auto tnow = std::chrono::steady_clock::now();
+  RT = std::chrono::duration<double>(tnow - tstart).count();
   return BEST;
 } 
 
@@ -165,14 +166,16 @@ int main(int argc, char** argv) {
   std::vector<StationData> stations;
   load(GFILE, stations);
   solve(stations, SID, TID, KMAX, QMAX);
-  RT *= 1e6; // s to us
-  cout << " cost = " << BEST << endl;
 
   string mapname = get_name(GFILE);
+  stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-  fout << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX << ",gurobi," 
-       << BEST << "," << 0 << ","
-       << setprecision(4) << RT << endl;
-  return 0;
+	// s -> us
+	RT *= 1e6;
+  row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
+      << ",mip," << BEST << "," << 0 << "," << setprecision(4) << RT
+      << "," << 0;
+  fout << row.str() << endl;
+  cout << row.str() << endl;
 }

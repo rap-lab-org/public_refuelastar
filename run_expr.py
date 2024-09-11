@@ -78,7 +78,7 @@ def run_small():
     solvers = [
         "dp", 
         "run_refill", 
-        # "mip-gurobi"
+        "mip-gurobi"
     ]
     for expr in exprs:
         run_map(expr, solvers)

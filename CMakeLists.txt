@@ -62,6 +62,6 @@ endforeach(exec_cpp_file ${exec_cpp_files})
 
 target_link_libraries("mip-gurobi" 
   ${PROJECT_NAME}
-  ${GRBLIB}
   gurobi_c++
+  ${GRBLIB}
 )
