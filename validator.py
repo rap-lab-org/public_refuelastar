@@ -18,6 +18,11 @@ def check(df: pd.DataFrame):
     if n > 0:
         print(t[t['dp'] != t['erca-noh']])
 
+    if 'mip' in t.columns:
+        n, _ = t[t['dp'] != t['mip']].shape
+        if n > 0:
+            print(t[t['dp'] != t['mip']])
+
 def check_all(dirname: str):
     logs = [i for i in os.listdir(dirname) if i.endswith(".log")]
     for log in logs:
