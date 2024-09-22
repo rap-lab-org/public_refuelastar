@@ -25,9 +25,9 @@ struct State {
   long k, q, v;
 };
 
-double RT, RTINIT, TIMELIMIT;
+double RT, RTINIT, RTPREC, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX, NUMSTATE;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE, PATHLENGTH, SHORTESTLENGTH;
 long BEST_STOP;
 
 void init_v(long v, long Q, Graph &g, Sets &reachVert, Maps &reachDist) {
@@ -222,6 +222,7 @@ long solve_table(const std::vector<StationData> &stations, const long s,
 
 	// preprocessing for all queries, which can be amortized
 	// so we don't count it in elapsed time
+	auto tpre = std::chrono::steady_clock::now();
   init(t, U, gr, c, reachVs, reachDist);
   for (auto u : gr.GetNodes()) {
     for (auto v : reachVs[u]) { // edge: u -> v
@@ -238,6 +239,7 @@ long solve_table(const std::vector<StationData> &stations, const long s,
     }
   }
   auto tstart = std::chrono::steady_clock::now();
+	RTPREC = std::chrono::duration<double>(tstart - tpre).count();
 
   RTINIT = 0;
   // state: dp[v][q][g] min cost from v to t, starting with g gas, using q stops
@@ -321,6 +323,8 @@ long solve_bfs(const std::vector<StationData> &stations, const long s,
     }
   }
 
+	PATHLENGTH = SHORTESTLENGTH = 0;
+
   auto tnow = std::chrono::steady_clock::now();
   RT = std::chrono::duration<double>(tnow - tstart).count();
   return BEST;
@@ -350,9 +354,10 @@ int main(int argc, char **argv) {
 	// s -> us
 	RT *= 1e6;
 	RTINIT *= 1e6;
+	RTPREC *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
       << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
-      << "," << RTINIT;
+      << "," << RTINIT << "," << RTPREC << "," << PATHLENGTH << "," << SHORTESTLENGTH;
   fout << row.str() << endl;
   cout << row.str() << endl;
 }

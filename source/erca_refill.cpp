@@ -80,6 +80,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   _computeReachableSets();
   // ### init heu and compute reachable sets ###
   auto t1 = std::chrono::steady_clock::now();
+	_res.rt_preproc = std::chrono::duration<double>(t1 - s).count();
 	if (this->heurW > 0) {
 		InitHeu(vd); // use the same one as in EMOAKd (EMOA).
 	}
@@ -186,8 +187,8 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
     }
   }
 
-  _PostProcRes();
   auto e = std::chrono::steady_clock::now();
+  _PostProcRes();
 
   // std::cout
   //     << "Elapsed time in microseconds: "
@@ -240,6 +241,8 @@ void AstarRefill::_filterAndAddFront(Label l) {
 
 void AstarRefill::_PostProcRes() {
   if (_alpha.find(_vd) != _alpha.end()) {
+		_res.dist = 0;
+		_res.shortest_dist = _dijks[1].GetCost(_vo);
     for (auto lid : _alpha[_vd].label_ids) {
       _res.paths[lid] = _BuildPath(lid);
       _res.costs[lid] = _label[lid].g;

@@ -68,9 +68,12 @@ struct EMOAResult {
   long n_domCheck = 0;
   double rt_initHeu = 0.0;
   double rt_search = 0.0;
+	double rt_preproc = 0.0;
   bool timeout = false;
   double num_nondom_labels_avg = -1;
   double num_nondom_labels_max = -1;
+	long shortest_dist = 0;
+	long dist = 0;
 };
 
 //////////////////////////////////////////////////////////////

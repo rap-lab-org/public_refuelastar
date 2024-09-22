@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 	RT *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
       << ",mip," << BEST << "," << 0 << "," << setprecision(4) << RT
-      << "," << 0;
+      << "," << 0 << "," << 0;
   fout << row.str() << endl;
   cout << row.str() << endl;
 }

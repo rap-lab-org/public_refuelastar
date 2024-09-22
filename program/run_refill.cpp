@@ -15,9 +15,9 @@
 
 namespace refill {
 
-double RT, RTINIT, TIMELIMIT;
+double RT, RTINIT, RTPREC, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HW;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HW, PATHLENGTH, SHORTESTLENGTH;
 rzq::search::EMOAResult res;
 
 long solve(std::string fname, const long s, const long t, const long K,
@@ -47,6 +47,9 @@ long solve(std::string fname, const long s, const long t, const long K,
   NUMSTATE = res.n_generated;
   RT = res.rt_search + res.rt_initHeu;
   RTINIT = res.rt_initHeu;
+	RTPREC = res.rt_preproc;
+	PATHLENGTH = res.dist;
+	SHORTESTLENGTH = res.shortest_dist;
 
   for (auto iter : res.paths) {
     long k = iter.first; // id of a Pareto-optipmal solution
@@ -81,9 +84,11 @@ int main(int argc, char **argv) {
   // s -> us
   RT *= 1e6;
   RTINIT *= 1e6;
+	RTPREC *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," 
 		  << QMAX << "," << ALGO << "," << BEST << "," << NUMSTATE << "," 
-			<< setprecision(4) << RT << "," << RTINIT;
+			<< setprecision(4) << RT << "," << RTINIT << "," << RTPREC << ","
+			<< PATHLENGTH << "," << SHORTESTLENGTH;
   fout << row.str() << endl;
   cout << row.str() << endl;
   return 0;
