@@ -242,7 +242,9 @@ void AstarRefill::_filterAndAddFront(Label l) {
 void AstarRefill::_PostProcRes() {
   if (_alpha.find(_vd) != _alpha.end()) {
 		_res.dist = 0;
-		_res.shortest_dist = _dijks[1].GetCost(_vo);
+		_res.shortest_dist = 0;
+		if (this->heurW > 0)
+			_res.shortest_dist = _dijks[1].GetCost(_vo);
     for (auto lid : _alpha[_vd].label_ids) {
       _res.paths[lid] = _BuildPath(lid);
       _res.costs[lid] = _label[lid].g;
