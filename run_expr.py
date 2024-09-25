@@ -25,7 +25,7 @@ def run_map(expr: str, solvers, query_fn: str=""):
     print(f">>> Running {expr}")
     mapname = expr.removesuffix(".csv").split("/")[-1]
     logdir = "./output"
-    header = "map,s,t,K,Q,algo,best,size,runtime,init_rt,preproc_rt,dist,shortest"
+    header = "map,s,t,K,Q,algo,best,size,runtime,init_rt,preproc_rt,hsize,shortest"
 
     if not os.path.exists("./output"):
         os.makedirs("output")

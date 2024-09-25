@@ -22,6 +22,7 @@ namespace search{
 class DijkstraScan {
 public:
   DijkstraScan();
+	long expdCnt = 0;
   virtual ~DijkstraScan();
   virtual void SetGraphPtr(basic::Graph* g) ;
   virtual int Search(long goal, size_t cdim) ;

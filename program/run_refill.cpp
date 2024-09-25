@@ -17,7 +17,7 @@ namespace refill {
 
 double RT, RTINIT, RTPREC, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HW, PATHLENGTH, SHORTESTLENGTH;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HW, HSIZE, SHORTESTLENGTH;
 rzq::search::EMOAResult res;
 
 long solve(std::string fname, const long s, const long t, const long K,
@@ -48,7 +48,7 @@ long solve(std::string fname, const long s, const long t, const long K,
   RT = res.rt_search + res.rt_initHeu;
   RTINIT = res.rt_initHeu;
 	RTPREC = res.rt_preproc;
-	PATHLENGTH = res.dist;
+	HSIZE = res.h_expanded;
 	SHORTESTLENGTH = res.shortest_dist;
 
   for (auto iter : res.paths) {
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," 
 		  << QMAX << "," << ALGO << "," << BEST << "," << NUMSTATE << "," 
 			<< setprecision(4) << RT << "," << RTINIT << "," << RTPREC << ","
-			<< PATHLENGTH << "," << SHORTESTLENGTH;
+			<< HSIZE << "," << SHORTESTLENGTH;
   fout << row.str() << endl;
   cout << row.str() << endl;
   return 0;

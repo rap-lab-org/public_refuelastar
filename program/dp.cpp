@@ -27,7 +27,7 @@ struct State {
 
 double RT, RTINIT, RTPREC, TIMELIMIT;
 std::string GFILE;
-long SID, TID, BEST, QMAX, KMAX, NUMSTATE, PATHLENGTH, SHORTESTLENGTH;
+long SID, TID, BEST, QMAX, KMAX, NUMSTATE, HSIZE, SHORTESTLENGTH;
 long BEST_STOP;
 
 void init_v(long v, long Q, Graph &g, Sets &reachVert, Maps &reachDist) {
@@ -323,7 +323,7 @@ long solve_bfs(const std::vector<StationData> &stations, const long s,
     }
   }
 
-	PATHLENGTH = SHORTESTLENGTH = 0;
+	HSIZE = SHORTESTLENGTH = 0;
 
   auto tnow = std::chrono::steady_clock::now();
   RT = std::chrono::duration<double>(tnow - tstart).count();
@@ -357,7 +357,7 @@ int main(int argc, char **argv) {
 	RTPREC *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
       << ",dp," << BEST << "," << NUMSTATE << "," << setprecision(4) << RT
-      << "," << RTINIT << "," << RTPREC << "," << PATHLENGTH << "," << SHORTESTLENGTH;
+      << "," << RTINIT << "," << RTPREC << "," << HSIZE << "," << SHORTESTLENGTH;
   fout << row.str() << endl;
   cout << row.str() << endl;
 }

@@ -66,6 +66,7 @@ struct EMOAResult {
   long n_generated = 0;
   long n_expanded = 0;
   long n_domCheck = 0;
+	long h_expanded = 0;
   double rt_initHeu = 0.0;
   double rt_search = 0.0;
 	double rt_preproc = 0.0;

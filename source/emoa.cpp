@@ -243,11 +243,13 @@ void EMOA::SetGraphPtr(basic::Graph* g) {
 
 void EMOA::InitHeu(long vd) {
   auto tstart = std::chrono::steady_clock::now();
+	_res.h_expanded = 0;
   _dijks.resize(_graph->GetCostDim());
 	// i=1 is the dist field!
   for (size_t i = 1; i<=1; i++) {
     _dijks[i].SetGraphPtr(_graph);
     _dijks[i].Search(vd, i);
+		_res.h_expanded += _dijks[i].expdCnt;
   }
   auto tend = std::chrono::steady_clock::now();
   _res.rt_initHeu = std::chrono::duration<double>(tend-tstart).count();
