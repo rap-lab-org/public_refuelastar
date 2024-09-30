@@ -90,7 +90,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
   // ### init ###
   auto tstart = std::chrono::steady_clock::now();
   basic::CostVector init_vec(0, _vec_len);
-  Label lo(_GenLabelId(), _vo, init_vec, _Heuristic(_vo));
+  Label lo(_GenLabelId(), _vo, init_vec, _Heuristic(_vo, 0));
   _label[lo.id] = lo;
   _res.n_generated++;
   _open.insert(std::make_pair(lo.f, lo.id));
@@ -170,7 +170,7 @@ int AstarRefill::Search(long vo, long vd, double time_limit) {
 
       l_prime.id = _GenLabelId(); //-->working
       l_prime.v = u;
-      l_prime.f = _Heuristic(u);
+      l_prime.f = _Heuristic(u, q_prime);
       l_prime.g = basic::CostVector({g_prime, q_prime, k_prime});
 
       if (_checkForPrune(l_prime)) {
@@ -212,13 +212,14 @@ void AstarRefill::SetQmax(long qm) { _q_max = qm; };
 
 void AstarRefill::SetKmax(long km) { _k_max = km; };
 
-basic::CostVector AstarRefill::_Heuristic(long v) {
+basic::CostVector AstarRefill::_Heuristic(long v, long q) {
 	if (this->heurW == 0) {
 		return basic::CostVector(std::vector<long>(_vec_len, 0));
 	}
   basic::CostVector out;
   out.resize(_vec_len, 0);
-  out[0] = EMOA::_Heuristic(v)[1] * this->minPrice; // this is the distance field!
+  out[0] = (EMOA::_Heuristic(v)[1] - q) * this->minPrice; // this is the distance field!
+	if (out[0] < 0) out[0] = 0;
   return out;
 };
 

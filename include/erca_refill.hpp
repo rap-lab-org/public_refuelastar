@@ -69,7 +69,7 @@ public:
 	long minPrice = std::numeric_limits<long>::max();
 
 protected:
-  virtual basic::CostVector _Heuristic(long v) override;
+  basic::CostVector _Heuristic(long v, long q);
 
   virtual bool _checkForPrune(Label l);
 
