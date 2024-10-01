@@ -1,3 +1,6 @@
+#include "expr_utils.hpp"
+#include "graph.hpp"
+#include <chrono>
 #include <cmath>
 #include <gurobi_c++.h>
 #include <gurobi_c.h>
@@ -5,46 +8,107 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <queue>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
-#include <chrono>
-#include "expr_utils.hpp"
-
 
 namespace gurobi {
 
 using namespace std;
+using Graph = rzq::basic::Roadmap;
+using Graph = rzq::basic::Roadmap;
+using Sets = unordered_map<long, std::unordered_set<long>>;
+using Map = unordered_map<long, long>;      // m[i] = v
+using Maps = std::unordered_map<long, Map>; // m[i][j] = v
+
 double RT, TIMELIMIT;
 std::string GFILE;
 long SID, TID, BEST, QMAX, KMAX;
 
-int idmaping(const vector<StationData>& stations, map<long, long>& ids) {
+int idmaping(const vector<StationData> &stations, map<long, long> &ids) {
   set<int> vars;
   ids.clear();
-  for (auto s: stations) {
+  for (auto s : stations) {
     vars.insert(s.id_from);
     vars.insert(s.id_to);
   }
   int cnt = 0;
-  for (auto v: vars) {
+  for (auto v : vars) {
     ids[v] = cnt++;
   }
   return cnt;
 }
 
-long solve(const vector<StationData> &station, 
-           long s, long t, const long K, const long Q) {
+void init_v(long v, long Q, Graph &g, Sets &reachVert, Maps &reachDist) {
+  Map dist;
+  typedef std::pair<long, long> Node;
+  std::priority_queue<Node, std::vector<Node>, std::greater<Node>> q;
+  for (auto i : g.GetNodes())
+    dist[i] = std::numeric_limits<long>::max();
+  dist[v] = 0;
+  q.push({0, v});
+
+  while (!q.empty()) {
+    auto cur = q.top();
+    q.pop();
+    long cdist = cur.first;
+    long cid = cur.second;
+
+    if (cdist > Q || cdist != dist[cid])
+      continue;
+    // now, we can guarantee cdist is the shortest distance from v to cid
+    reachVert[v].insert(cid);
+    reachDist[v][cid] = cdist;
+
+    for (auto nxt : g.GetSuccs(cid)) {
+      // cost[1] is distance
+      auto ecost = g.GetCost(cid, nxt)[1];
+      if (dist[nxt] > dist[cid] + ecost) {
+        dist[nxt] = dist[cid] + ecost;
+        q.push({dist[nxt], nxt});
+      }
+    }
+  }
+}
+
+void init(long t, long Q, Graph &g, Sets &reachVert, Maps &reachDist) {
+  for (auto v : g.GetNodes()) {
+    reachVert[v] = {};
+    reachDist[v] = {};
+    init_v(v, Q, g, reachVert, reachDist);
+  }
+}
+
+long solve(const vector<StationData> &station, long s, long t, const long K,
+           const long Q) {
+
+  Graph gr;
+  Sets reachVs, predVs;
+  Maps reachDist;
+  build_graph(station, gr);
+  init(t, Q, gr, reachVs, reachDist);
 
   map<long, long> ids;
   int n = idmaping(station, ids);
-  std::vector<long> c(n, numeric_limits<long>::max());
+  auto inf = numeric_limits<long>::max();
+  std::vector<long> c(n, inf);
   std::vector<std::vector<long>> d(n, std::vector<long>(n, 0));
+  std::vector<std::vector<long>> a(n, std::vector<long>(n, 0));
   std::vector<std::vector<int>> E(n, std::vector<int>(n, 0));
   for (auto i : station) {
     long frID = ids[i.id_from];
     long toID = ids[i.id_to];
-    c[frID] = i.id_from == t? 0: i.cost;
-    d[frID][toID] = i.distance;
+    c[frID] = i.id_from == t ? 0 : i.cost;
+  }
+  for (auto u : gr.GetNodes()) {
+    for (auto v : reachVs[u]) {
+      auto dist = reachDist[u][v];
+      auto uid = ids[u];
+      auto vid = ids[v];
+      d[uid][vid] = dist;
+    }
   }
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++)
@@ -70,7 +134,8 @@ long solve(const vector<StationData> &station,
     // decision varaibles
     vector<vector<GRBVar>> x(n, vector<GRBVar>(n));
     vector<GRBVar> r(n); // amount of gas left in the tank
-    vector<GRBVar> g(n); // the amount of gas purchased to refuel the vehicle at v_i
+    vector<GRBVar> g(
+        n); // the amount of gas purchased to refuel the vehicle at v_i
     vector<GRBVar> y(n); // stop mad or not
 
     // init varaibles
@@ -108,21 +173,27 @@ long solve(const vector<StationData> &station,
         model.addConstr(flow_in - flow_out == 0);
       }
       // Gas Conservation
-      for (int j = 0; j < n; j++) {
-        if (i != j) {
+      for (int j = 0; j < n; j++)
+        if (j != i) {
           // if (x[i][j] == 1) then (...) == 0
           model.addGenConstrIndicator(x[i][j], 1,
                                       (r[i] + g[i] - d[i][j] - r[j] == 0));
+					model.addGenConstrIndicator(x[i][j], 1, y[i] == 1);
+          if (c[i] > c[j]) {
+            model.addGenConstrIndicator(x[i][j], 1, g[i] == d[i][j]);
+          } else {
+            model.addGenConstrIndicator(x[i][j], 1, g[i] + r[i] == Q);
+          }
         }
-      }
       // Tank Capacity
       model.addConstr(r[i] + g[i] <= Q);
 
       // Stops Constraint
       GRBLinExpr stops = 0;
-      for (int j=0; j<n; j++) if (j != i) {
-        stops += y[j];
-      }
+      for (int j = 0; j < n; j++)
+        if (j != i) {
+          stops += y[j];
+        }
       model.addConstr(stops <= K);
     }
 
@@ -143,11 +214,11 @@ long solve(const vector<StationData> &station,
   auto tnow = std::chrono::steady_clock::now();
   RT = std::chrono::duration<double>(tnow - tstart).count();
   return BEST;
-} 
+}
 
-};
+}; // namespace gurobi
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
   using namespace gurobi;
 
@@ -172,11 +243,11 @@ int main(int argc, char** argv) {
   stringstream row;
   ofstream fout;
   fout.open("output/" + mapname + ".log", ios_base::app);
-	// s -> us
-	RT *= 1e6;
+  // s -> us
+  RT *= 1e6;
   row << mapname << "," << SID << "," << TID << "," << KMAX << "," << QMAX
-      << ",mip," << BEST << "," << 0 << "," << setprecision(4) << RT
-      << "," << 0 << "," << 0;
+      << ",mip," << BEST << "," << 0 << "," << setprecision(4) << RT << "," << 0
+      << "," << 0;
   fout << row.str() << endl;
   cout << row.str() << endl;
 }
