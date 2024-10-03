@@ -180,7 +180,7 @@ long solve(const vector<StationData> &station, long s, long t, const long K,
                                       (r[i] + g[i] - d[i][j] - r[j] == 0));
 					model.addGenConstrIndicator(x[i][j], 1, y[i] == 1);
           if (c[i] > c[j]) {
-            model.addGenConstrIndicator(x[i][j], 1, g[i] == d[i][j]);
+            model.addGenConstrIndicator(x[i][j], 1, g[i] + r[i] >= d[i][j]);
           } else {
             model.addGenConstrIndicator(x[i][j], 1, g[i] + r[i] == Q);
           }
