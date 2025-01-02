@@ -62,6 +62,41 @@ def run_city():
         assert os.path.exists(qfn)
         run_map(expr, solvers, query_fn=qfn)
 
+def run_syn_small():
+    global K, Q
+    K = 3
+    Q = 10 
+    exprs = [
+        "./syn-data/8.csv",
+        # "./syn-data/16.csv",
+        # "./syn-data/32.csv",
+    ]
+
+    solvers = [
+        "dp", 
+        "run_refill", 
+        "mip-gurobi"
+    ]
+    for expr in exprs:
+        run_map(expr, solvers)
+
+def run_syn_large():
+    global K, Q
+    K = 20 
+    Q = 20 
+    exprs = [
+        "./syn-data/256.csv",
+        "./syn-data/512.csv",
+        "./syn-data/1024.csv",
+    ]
+
+    solvers = [
+        "dp", 
+        "run_refill", 
+        # "mip-gurobi"
+    ]
+    for expr in exprs:
+        run_map(expr, solvers)
 
 def run_small():
     global K, Q
@@ -85,7 +120,14 @@ def run_small():
 
 
 if __name__ == "__main__":
-    if len(sys.argv)>1 and sys.argv[1] == "city":
+    mode = 'city'
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+    if mode == "city":
         run_city()
+    elif mode == 'syn-small':
+        run_syn_small()
+    elif mode == 'syn-large':
+        run_syn_large()
     else:
         run_small()

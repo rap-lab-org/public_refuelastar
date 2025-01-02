@@ -12,16 +12,19 @@ def check(df: pd.DataFrame):
     n, _ = t[t['dp'] != t['erca']].shape
     if n > 0:
         print(t[t['dp'] != t['erca']])
-        # assert False
+        return False
 
     n, _ = t[t['dp'] != t['erca-noh']].shape
     if n > 0:
         print(t[t['dp'] != t['erca-noh']])
+        return False
 
     if 'mip' in t.columns:
         n, _ = t[t['dp'] != t['mip']].shape
         if n > 0:
             print(t[t['dp'] != t['mip']])
+            return False
+    return True
 
 def check_all(dirname: str):
     logs = [i for i in os.listdir(dirname) if i.endswith(".log")]
@@ -29,8 +32,11 @@ def check_all(dirname: str):
         logpath = os.path.join(dirname, log)
         print (f"Checking {logpath} ...")
         df = pd.read_csv(logpath)
-        check(df)
+        ret = check(df)
+        if not ret:
+            return False
     print ("All passed.")
+    return True
 
 
 if __name__ == "__main__":
