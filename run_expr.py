@@ -67,9 +67,9 @@ def run_syn_small():
     K = 3
     Q = 10 
     exprs = [
-        "./syn-data/8.csv",
-        # "./syn-data/16.csv",
-        # "./syn-data/32.csv",
+        ("./syn-data/8.csv", ""),
+        ("./syn-data/16.csv", "./syn-data/16.query"),
+        ("./syn-data/32.csv", "./syn-data/32.query"),
     ]
 
     solvers = [
@@ -77,8 +77,8 @@ def run_syn_small():
         "run_refill", 
         "mip-gurobi"
     ]
-    for expr in exprs:
-        run_map(expr, solvers)
+    for expr, query in exprs:
+        run_map(expr, solvers, query_fn=query)
 
 def run_syn_large():
     global K, Q
@@ -93,10 +93,10 @@ def run_syn_large():
     solvers = [
         "dp", 
         "run_refill", 
-        # "mip-gurobi"
     ]
     for expr in exprs:
-        run_map(expr, solvers)
+        qfn = expr.removesuffix(".csv") + ".query"
+        run_map(expr, solvers, query_fn=qfn)
 
 def run_small():
     global K, Q
