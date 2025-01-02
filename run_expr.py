@@ -82,11 +82,11 @@ def run_syn_small():
 
 def run_syn_large():
     global K, Q
-    K = 20 
-    Q = 20 
+    K = 10 
+    Q = 15 
     exprs = [
-        "./syn-data/256.csv",
-        "./syn-data/512.csv",
+        # "./syn-data/256.csv",
+        # "./syn-data/512.csv",
         "./syn-data/1024.csv",
     ]
 
