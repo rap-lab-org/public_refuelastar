@@ -37,3 +37,4 @@ gurobi_dir/*
 *.log
 */*.query
 */*.ipynb
+__pycache__/**

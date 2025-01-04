@@ -85,8 +85,8 @@ def run_syn_large():
     K = 10 
     Q = 15 
     exprs = [
-        # "./syn-data/256.csv",
-        # "./syn-data/512.csv",
+        "./syn-data/256.csv",
+        "./syn-data/512.csv",
         "./syn-data/1024.csv",
     ]
 
