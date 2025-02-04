@@ -71,8 +71,10 @@ SOFTWARE.
         * `<Q>`: max capacity of tank
 
 ### Run experiments
+* `python gen_expr.py`: generate instances for experiments, generated instances are stored in `city-data/` and `syn-data/`
 * `run_expr.py` run multiple instances and save result in `./output`
-    * `./run_expr.py small`: run experiment on all maps in `./small-data`
+    * `./run_expr.py syn-small`: run experiment on all small maps in `./syn-data` (`8.csv, 16.csv, 32.csv`)
+    * `./run_expr.py syn-large`: run experiment on all large maps in `./syn-data` (`256.csv, 512.csv, 1024.csv`)
     * `./run_expr.py city`: run experiment on all maps in `./city-data`
 * `./validator.py output`: validate all result in `./output`
 
