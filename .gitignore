@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+build/*
+gurobi_dir/*
+.cache/*
+.launch.json
+*.log
+*/*.query
+*/*.ipynb
+__pycache__/**

@@ -41,7 +41,7 @@ int DijkstraScan::Search(long src, size_t cdim) {
 
   // src is not in _parent.
   // _parent[src] = -1; // no parent.
-
+	this->expdCnt = 0;
   while(!open.empty()){
     std::pair<long, long> curr_pair = *(open.begin());
     open.erase(open.begin());
@@ -68,6 +68,7 @@ int DijkstraScan::Search(long src, size_t cdim) {
         _cvec[u] = cvec_u;
         _parent[u] = v;
         open.insert(std::make_pair(dist_u, u));
+				this->expdCnt ++;
       }else{
         // already inserted
         if ( dist_u < _v2d[u] ){
@@ -80,6 +81,7 @@ int DijkstraScan::Search(long src, size_t cdim) {
           // }
           _parent[u] = v;
           open.insert(temp_pair); // re-insert
+					this->expdCnt ++;
         }
       }// end else
     }// end for

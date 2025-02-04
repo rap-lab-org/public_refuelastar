@@ -148,7 +148,7 @@ public:
 
   virtual bool HasEdge(long u, long v);
 
-  virtual std::unordered_set<long> GetNodes();
+  const std::unordered_set<long>& GetNodes() const;
 
   virtual void AddNode(long v);
   virtual void AddEdge(long v1, long v2, CostVector& c);
