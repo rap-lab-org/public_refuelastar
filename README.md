@@ -1,6 +1,6 @@
-# Refuel A* (RA*)
+# Refuel A* (RF-A*)
 This work addresses the Path Finding with Refuelling (PF-RF) problem, where the main objective is to find a minimum cost of refuelling path from the start to the goal while ensuring that the robot does not cross a specified limit on the number of stops made.
-This repo provides a C++ implementation of Refuel A\* (RA\*) Algorithm, which is guaranteed to find an optimal solution path.
+This repo provides a C++ implementation of Refuel A\* (RF-A\*) Algorithm, which is guaranteed to find an optimal solution path.
 
 The code is distributed for academic and non-commercial use.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
