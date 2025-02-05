@@ -54,6 +54,10 @@ SOFTWARE.
     * `make fast`: compile the project using `-DCMAKE_BUILD_TYPE=release` flag
     * `make dev`: compile the project using `-DCMAKE_BUILD_TYPE=debug` flag
 
+**Notice:** For user who haven't installed `Gurobi C++`, the build process will report a compilation error.
+    Users can simply ignore this error, as the other executables (`dp,run_refill`) can still be successfully compiled.
+
+
 ### Command-Line Interface (CLI)
 
 * Run example via command-line interface (CLI)
@@ -64,7 +68,7 @@ SOFTWARE.
         * `<expr>` are one of solver: 
             * `./build/dp`: the Dynamic Programming method
             * `./build/run_refill`: `ERCA*`, the proposed method
-            * `./build/mip-gurobi`: the MIP model by Gurobi solver
+            * `./build/mip-gurobi`: the MIP model by Gurobi solver (optional)
         * `<map>` map files in `./small-data` or `./city-data`
         * `<start>, <target>`: vertex id of start and target location
         * `<K>`: max number of stops
@@ -74,7 +78,10 @@ SOFTWARE.
 * `python gen_expr.py`: generate instances for experiments, generated instances are stored in `city-data/` and `syn-data/`
 * `run_expr.py` run multiple instances and save result in `./output`
     * `./run_expr.py syn-small`: run experiment on all small maps in `./syn-data` (`8.csv, 16.csv, 32.csv`)
+        * `./run_expr.py syn-small 0`: the same as above but excluding `mip-gurobi` 
     * `./run_expr.py syn-large`: run experiment on all large maps in `./syn-data` (`256.csv, 512.csv, 1024.csv`)
+    * `./run_expr.py small`: run experiment on small maps in `./small-data`
+        * `./run_expr.py small 0`: the same as above but excluding `mip-gurobi`
     * `./run_expr.py city`: run experiment on all maps in `./city-data`
 * `./validator.py output`: validate all result in `./output`
 

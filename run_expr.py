@@ -62,7 +62,7 @@ def run_city():
         assert os.path.exists(qfn)
         run_map(expr, solvers, query_fn=qfn)
 
-def run_syn_small():
+def run_syn_small(run_mip=0):
     global K, Q
     K = 3
     Q = 10 
@@ -75,8 +75,9 @@ def run_syn_small():
     solvers = [
         "dp", 
         "run_refill", 
-        "mip-gurobi"
     ]
+    if run_mip:
+        solvers.append('mip-gurobi')
     for expr, query in exprs:
         run_map(expr, solvers, query_fn=query)
 
@@ -98,7 +99,7 @@ def run_syn_large():
         qfn = expr.removesuffix(".csv") + ".query"
         run_map(expr, solvers, query_fn=qfn)
 
-def run_small():
+def run_small(run_mip=0):
     global K, Q
     K = 3
     Q = 8 
@@ -113,21 +114,25 @@ def run_small():
     solvers = [
         "dp", 
         "run_refill", 
-        "mip-gurobi"
     ]
+    if run_mip:
+        solvers.append('mip-gurobi')
     for expr in exprs:
         run_map(expr, solvers)
 
 
 if __name__ == "__main__":
     mode = 'city'
+    run_mip = 1
     if len(sys.argv) > 1:
         mode = sys.argv[1]
+    if len(sys.argv) > 2:
+        run_mip = int(sys.argv[2])
     if mode == "city":
         run_city()
     elif mode == 'syn-small':
-        run_syn_small()
+        run_syn_small(run_mip)
     elif mode == 'syn-large':
         run_syn_large()
-    else:
-        run_small()
+    elif mode == "small":
+        run_small(run_mip)
