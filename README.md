@@ -111,3 +111,17 @@ Result file contains multiple columns of metadata in two categories:
    Phil_gas,58,39,10,60000,dp,2237892,1334182,7.732e+04
    Phil_gas,39,58,10,60000,dp,2134697,1369647,7.743e+04
     ```
+## Cite
+If you found this work useful, please consider citing:
+```
+@ARTICLE{10879573,
+  author={Zhao, Shizhe and Nandy, Anushtup and Choset, Howie and Rathinam, Sivakumar and Ren, Zhongqiang},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={Heuristic Search for Path Finding with Refuelling}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-8},
+  keywords={Fuels;Costs;Urban areas;Electronic mail;Dynamic programming;Robot kinematics;Mathematical programming;Autonomous aerial vehicles;Training;Runtime;Motion and Path Planning;Scheduling and Coordination;Robotics in Under-Resourced Settings},
+  doi={10.1109/LRA.2025.3540736}}
+```
