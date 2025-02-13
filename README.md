@@ -11,6 +11,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+<p align="center">
+    <img src="docs/rf-example.png" width="600" alt="A 100 agent MAPF-AA instances.">
+    <p align="center">(Fig 1: Example of PF-RF. The minimum-cost path is ACEF, and the minimum fuel consumption path is ABDF.)</p>
+</p>
+
 ## Requirements
 
 * We use CMake (3.16.3) and Make (4.2.1) to compile the code. Lower or higher version may also work.
